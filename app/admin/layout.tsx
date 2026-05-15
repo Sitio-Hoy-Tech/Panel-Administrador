@@ -21,7 +21,7 @@ export default function DashboardLayout({
     const detectPlan = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        setPlan("esencial"); // fallback
+        setPlan(null);
         return;
       }
 
@@ -51,7 +51,15 @@ export default function DashboardLayout({
         setPlan("esencial");
       }
     };
+
     detectPlan();
+
+    // Re-detectar plan cuando cambia el estado de auth (login/logout)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      detectPlan();
+    });
+
+    return () => subscription.unsubscribe();
   }, [supabase]);
 
   // Mientras carga el plan, no renderizar nada (evita flash)
