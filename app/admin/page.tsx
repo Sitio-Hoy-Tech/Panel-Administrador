@@ -1,13 +1,18 @@
-import { getPlanType } from "@/lib/plan-config";
+import { getCurrentTenantWithPlan } from "@/utils/auth";
+import { redirect } from "next/navigation";
 
 import EsencialDashboard from "./_plans/esencial/DashboardPage";
 import EmprendimientoDashboard from "./_plans/emprendimiento/DashboardPage";
 import EmpresaDashboard from "./_plans/empresa/DashboardPage";
 
 export default async function Dashboard() {
-  const plan = getPlanType();
+  const tenantData = await getCurrentTenantWithPlan();
 
-  switch (plan) {
+  if (!tenantData) {
+    redirect("/admin/login");
+  }
+
+  switch (tenantData.plan) {
     case "esencial":
       return <EsencialDashboard />;
     case "emprendimiento":

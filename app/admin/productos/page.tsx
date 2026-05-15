@@ -1,4 +1,4 @@
-import { getPlanType } from "@/lib/plan-config";
+import { detectPlan } from "@/lib/plan-config";
 import { notFound } from "next/navigation";
 
 import EsencialProductos from "../_plans/esencial/productos/page";
@@ -10,7 +10,7 @@ export default async function ProductosPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const plan = getPlanType();
+  const plan = await detectPlan();
 
   switch (plan) {
     case "esencial":

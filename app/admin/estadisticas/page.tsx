@@ -1,4 +1,4 @@
-import { getPlanType } from "@/lib/plan-config";
+import { detectPlan } from "@/lib/plan-config";
 import { notFound } from "next/navigation";
 
 import EmpresaEstadisticas from "../_plans/empresa/estadisticas/page";
@@ -8,13 +8,12 @@ export default async function EstadisticasPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const plan = getPlanType();
+  const plan = await detectPlan();
 
   switch (plan) {
     case "empresa":
       return <EmpresaEstadisticas searchParams={searchParams} />;
     default:
-      // Solo el plan empresa tiene estadísticas avanzadas
       notFound();
   }
 }

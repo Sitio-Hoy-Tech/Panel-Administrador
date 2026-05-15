@@ -1,16 +1,15 @@
-import { getPlanType } from "@/lib/plan-config";
+import { detectPlan } from "@/lib/plan-config";
 import { notFound } from "next/navigation";
 
 import EmprendimientoAnaliticas from "../_plans/emprendimiento/analiticas/page";
 
-export default function AnaliticasPage() {
-  const plan = getPlanType();
+export default async function AnaliticasPage() {
+  const plan = await detectPlan();
 
   switch (plan) {
     case "emprendimiento":
       return <EmprendimientoAnaliticas />;
     default:
-      // Solo el plan emprendimiento tiene la ruta /analiticas
       notFound();
   }
 }

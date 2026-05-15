@@ -1,4 +1,4 @@
-import { getPlanType } from "@/lib/plan-config";
+import { detectPlan } from "@/lib/plan-config";
 
 import EsencialEditar from "../../../_plans/esencial/productos/editar/[id]/page";
 import EmprendimientoEditar from "../../../_plans/emprendimiento/productos/editar/[id]/page";
@@ -9,7 +9,7 @@ export default async function EditarProductoPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const plan = getPlanType();
+  const plan = await detectPlan();
 
   switch (plan) {
     case "esencial":

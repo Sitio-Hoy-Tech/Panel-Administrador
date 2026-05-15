@@ -20,7 +20,28 @@ export default function EmpresaLayout({
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const name = user.user_metadata?.name || user.user_metadata?.full_name || user.email?.split('@')[0] || "Usuario";
+        // Buscar el nombre del negocio desde la tabla tenants
+        const { data: userTenant } = await supabase
+          .from("user_tenants")
+          .select("tenant_id")
+          .eq("user_id", user.id)
+          .single();
+
+        if (userTenant?.tenant_id) {
+          const { data: tenant } = await supabase
+            .from("tenants")
+            .select("name")
+            .eq("id", userTenant.tenant_id)
+            .single();
+
+          if (tenant?.name) {
+            setUserName(tenant.name);
+            return;
+          }
+        }
+
+        // Fallback al email si no se encuentra el tenant
+        const name = user.email?.split('@')[0] || "Usuario";
         setUserName(name);
       }
     };

@@ -16,22 +16,42 @@ export default function EmprendimientoLayout({
   const [userName, setUserName] = useState("Usuario");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const supabase = createClient();
-
-  // Si estamos en el login, no mostramos el layout del dashboard
-  if (pathname === "/admin/login") {
-    return <>{children}</>;
-  }
-
   useEffect(() => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const name = user.user_metadata?.name || user.user_metadata?.full_name || user.email?.split('@')[0] || "Usuario";
+        // Buscar el nombre del negocio desde la tabla tenants
+        const { data: userTenant } = await supabase
+          .from("user_tenants")
+          .select("tenant_id")
+          .eq("user_id", user.id)
+          .single();
+
+        if (userTenant?.tenant_id) {
+          const { data: tenant } = await supabase
+            .from("tenants")
+            .select("name")
+            .eq("id", userTenant.tenant_id)
+            .single();
+
+          if (tenant?.name) {
+            setUserName(tenant.name);
+            return;
+          }
+        }
+
+        // Fallback al email si no se encuentra el tenant
+        const name = user.email?.split('@')[0] || "Usuario";
         setUserName(name);
       }
     };
     getUser();
   }, [supabase]);
+
+  // Si estamos en el login, no mostramos el layout del dashboard
+  if (pathname === "/admin/login") {
+    return <>{children}</>;
+  }
 
   return (
     <div className="flex flex-col lg:flex-row h-svh w-full p-0 lg:p-6 gap-0 lg:gap-6 relative z-10 overflow-hidden bg-black">
