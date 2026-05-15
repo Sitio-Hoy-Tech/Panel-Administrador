@@ -1,51 +1,66 @@
-# SitioHoy — Paneles de Administración
+# Panel de Administración — SitioHoy
 
-Este repositorio contiene los paneles de administración para los tres niveles de servicio de SitioHoy. Cada panel está diseñado con una estética premium, oscura y minimalista para ofrecer la mejor experiencia de usuario a los clientes.
+Panel de administración unificado para clientes de SitioHoy. Un solo proyecto Next.js que muestra distintas funcionalidades según el plan del cliente.
 
-## 📂 Estructura de Planes
+## Planes Disponibles
 
-| Plan | Directorio | Descripción | Precio (Abril 2026) |
-|---|---|---|---|
-| **Esencial** | `/esencial` | Catálogo básico, contacto WhatsApp, diseño premium. | $25.000/mes |
-| **Emprendimiento** | `/emprendimiento` | Tienda completa, MercadoPago, gestión de stock. | $37.000/mes |
-| **Empresa** | `/empresa` | Todo lo anterior + Ilimitado, Analítica, Envíos Auto. | $65.000/mes |
+| Funcionalidad | Esencial | Emprendimiento | Empresa |
+|---|:---:|:---:|:---:|
+| Dashboard | ✅ | ✅ | ✅ |
+| Catálogo de Productos | ✅ (hasta 50) | ✅ (hasta 200) | ✅ (ilimitado) |
+| Categorías | ❌ | ✅ | ✅ |
+| Órdenes | ❌ | ✅ | ✅ |
+| Cupones | ❌ | ✅ | ✅ |
+| Clientes | ❌ | ❌ | ✅ |
+| Analíticas | ❌ | ✅ (básicas) | ✅ (avanzadas) |
+| Configuración | ✅ (teléfono) | ✅ (completa) | ✅ (completa) |
+| Mi Plan | ✅ | ✅ | ✅ |
+| Soporte | ✅ | ✅ | ✅ |
 
----
+## Configuración
 
-## 🚀 Cómo empezar
-
-### 1. Clonar el repositorio
-Cualquiera de las carpetas es un proyecto Next.js independiente. Elegí la que corresponda al plan del cliente.
-
-### 2. Configuración de Base de Datos
-Todos los planes utilizan **Supabase**. Asegurate de:
-1. Crear un proyecto en Supabase.
-2. Ejecutar las migraciones necesarias (ver `/utils/supabase/schema.sql` si existe o solicitar el esquema base).
-3. Configurar el **Multi-tenancy**: Cada cliente debe tener un registro en la tabla `tenants` y un usuario asociado en `user_tenants`.
-
-### 3. Variables de Entorno
-Cada plan tiene requisitos específicos (ej: MercadoPago, Umami). Consultá la sección **🔐 Variables de Entorno** en el README de cada carpeta para ver exactamente qué keys necesitás.
-
----
-
-## 🛠️ Desarrollo
-
-Para ejecutar localmente un panel específico:
+1. Copiar `.env.example` a `.env.local`
+2. Configurar las credenciales de Supabase
+3. **Establecer el plan del cliente:**
 
 ```bash
-cd [directorio-del-plan]
+NEXT_PUBLIC_PLAN_TYPE=esencial   # o emprendimiento, o empresa
+```
+
+## Desarrollo
+
+```bash
 npm install
 npm run dev
 ```
 
----
+## Deploy
 
-## 📄 Guías Detalladas
-- [Implementación Plan Esencial](./esencial/README.md)
-- [Implementación Plan Emprendimiento](./emprendimiento/README.md)
-- [Implementación Plan Empresa](./empresa/README.md)
+Al deployar para un cliente, solo se necesita configurar `NEXT_PUBLIC_PLAN_TYPE` con el plan correcto en las variables de entorno del hosting (Vercel, etc.).
 
----
+## Estructura del Proyecto
 
-## ⚖️ Licencia
-Propiedad de **SitioHoy**. Prohibida su reproducción sin autorización.
+```
+├── actions/                    # Server Actions por plan
+│   ├── auth.ts                 # Wrapper que delega al plan correcto
+│   ├── esencial/               # Actions del plan esencial
+│   ├── emprendimiento/         # Actions del plan emprendimiento
+│   └── empresa/                # Actions del plan empresa
+├── app/
+│   └── admin/
+│       ├── _plans/             # Páginas originales de cada plan (no son rutas)
+│       │   ├── esencial/
+│       │   ├── emprendimiento/
+│       │   └── empresa/
+│       ├── page.tsx            # Wrapper → renderiza dashboard del plan
+│       ├── layout.tsx          # Wrapper → renderiza layout del plan
+│       ├── productos/          # Wrapper → renderiza productos del plan
+│       └── ...                 # Todas las rutas son wrappers
+├── components/                 # Componentes UI por plan
+│   ├── esencial/
+│   ├── emprendimiento/
+│   └── empresa/
+├── lib/
+│   └── plan-config.ts          # Configuración central del plan
+└── utils/                      # Utilidades compartidas (Supabase, auth)
+```
