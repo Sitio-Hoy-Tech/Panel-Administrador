@@ -1,0 +1,33 @@
+import { createClient } from "@/utils/supabase/server";
+import { getCurrentTenant } from "@/utils/auth";
+import { redirect } from "next/navigation";
+import { ConfigForm } from "./ConfigForm";
+
+export default async function ConfiguracionPage() {
+  const tenantId = await getCurrentTenant();
+  
+  if (!tenantId) {
+    redirect("/admin/login");
+  }
+
+  const supabase = await createClient();
+
+  const { data: tenant } = await supabase
+    .from('tenants')
+    .select('origin_phone')
+    .eq('id', tenantId)
+    .single();
+
+  const initialPhone = tenant?.origin_phone || "";
+
+  return (
+    <div className="max-w-3xl mx-auto space-y-8">
+      <div>
+        <h1 className="text-4xl font-bold tracking-tight text-white">Configuración</h1>
+        <p className="mt-2 text-zinc-400">Administrá los canales de contacto de tu negocio.</p>
+      </div>
+
+      <ConfigForm initialPhone={initialPhone} />
+    </div>
+  );
+}
