@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Plus, Image as ImageIcon, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { getProductos } from "@/actions/emprendimiento/productos";
 import { getCategorias } from "@/actions/emprendimiento/categorias";
-import { ProductActions } from "./ProductActions";
+import { ProductListTable } from "./ProductListTable";
 import { ProductFilters } from "./ProductFilters";
 
 export default async function ProductosPage({
@@ -12,7 +12,7 @@ export default async function ProductosPage({
 }) {
   const { page: pageStr, q, status, category } = await searchParams;
   const currentPage = parseInt(pageStr || "1");
-  const itemsPerPage = 5;
+  const itemsPerPage = 7;
 
   const { data: allProductos, error } = await getProductos();
   const { data: categories } = await getCategorias();
@@ -99,81 +99,7 @@ export default async function ProductosPage({
         </div>
       ) : (
         <div className="glass-panel">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-zinc-400 min-w-[700px] md:min-w-0">
-              <thead className="bg-white/[0.02] border-b border-white/5 text-xs uppercase font-semibold text-zinc-500 tracking-wider">
-                <tr>
-                  <th scope="col" className="px-6 py-4">Producto / Servicio</th>
-                  <th scope="col" className="px-6 py-4">Precio</th>
-                  <th scope="col" className="px-6 py-4">Stock</th>
-                  <th scope="col" className="px-6 py-4 text-right">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5">
-                {productos?.map((prod) => (
-                  <tr key={prod.id} className={`group transition-colors duration-300 hover:bg-white/[0.02] ${!prod.active ? 'opacity-50' : ''}`}>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-4">
-                        <div className="h-12 w-12 rounded-xl bg-surface flex items-center justify-center border border-white/5 flex-shrink-0 shadow-inner overflow-hidden relative">
-                          {prod.image ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={prod.image} alt={prod.name} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                          ) : (
-                            <ImageIcon className="h-5 w-5 text-zinc-600" />
-                          )}
-                          {!prod.active && (
-                            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                              <span className="text-[10px] font-bold text-white uppercase tracking-wider">Pausado</span>
-                            </div>
-                          )}
-                        </div>
-                        <div>
-                          <div className="font-medium text-foreground text-base group-hover:text-primary transition-colors flex items-center gap-2">
-                            {prod.name}
-                            {!prod.active && <span className="px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400 text-[10px] uppercase font-bold border border-white/5">Oculto</span>}
-                            {prod.is_sale && <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] uppercase font-bold border border-emerald-500/20">En Oferta</span>}
-                            {prod.stock !== null && prod.stock > 0 && prod.stock <= 5 && (
-                              <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 text-[10px] uppercase font-bold border border-amber-500/20">Últimas Unidades</span>
-                            )}
-                          </div>
-                          <div className="text-xs mt-1 truncate max-w-[200px] md:max-w-md text-zinc-500">{prod.description}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 font-medium text-zinc-300">
-                      {prod.is_sale && prod.sale_price ? (
-                        <div className="flex flex-col">
-                          <span className="text-zinc-500 line-through text-xs font-normal">${prod.price.toLocaleString("es-AR")}</span>
-                          <span className="text-emerald-400 font-bold">${prod.sale_price.toLocaleString("es-AR")}</span>
-                        </div>
-                      ) : (
-                        <span>${prod.price.toLocaleString("es-AR")}</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-zinc-400">
-                      {prod.stock !== null && prod.stock !== undefined ? (
-                        <div className="flex flex-col gap-1">
-                          <span className={`${prod.stock <= 5 ? 'text-amber-400 font-medium' : 'text-zinc-300'}`}>
-                            {prod.stock} u.
-                          </span>
-                          {prod.stock === 0 && (
-                            <span className="text-[10px] bg-red-500/10 text-red-400 px-1.5 py-0.5 rounded uppercase font-bold w-fit tracking-wider">
-                              Agotado
-                            </span>
-                          )}
-                        </div>
-                      ) : (
-                        <span className="text-zinc-600">—</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <ProductActions product={{ id: prod.id, active: prod.active }} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <ProductListTable initialProductos={productos} startIndex={startIndex} />
         </div>
       )}
 

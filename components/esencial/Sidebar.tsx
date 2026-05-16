@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 import { LayoutDashboard, Package, Settings, LogOut, ExternalLink, HelpCircle, CreditCard } from "lucide-react";
 import clsx from "clsx";
 import { logout } from "@/actions/auth";
@@ -128,6 +129,17 @@ export function Sidebar({ userName, onLinkClick }: { userName?: string, onLinkCl
             </button>
           </form>
         </div>
+      </div>
+
+      {/* Watermark Logo */}
+      <div className="mt-8 px-4 opacity-[0.1] pointer-events-none select-none transition-opacity duration-500 hover:opacity-20 flex justify-center">
+        <Image 
+          src="/logo-sitiohoy.png" 
+          alt="SitioHoy Logo" 
+          width={80} 
+          height={80} 
+          className="object-contain"
+        />
       </div>
     </div>
   );

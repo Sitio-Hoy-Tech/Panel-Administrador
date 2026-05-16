@@ -100,19 +100,7 @@ export default function EsencialLayout({
       <div className="flex-1 h-full relative group overflow-hidden lg:p-0">
         <div className="hidden lg:block absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000 rounded-[2.5rem] pointer-events-none"></div>
         <main className="h-full bg-[#0A0A0A]/80 backdrop-blur-3xl lg:rounded-[2rem] border-x-0 lg:border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.8)] overflow-y-auto hide-scrollbar relative z-10">
-          {/* Watermark Logo - Bottom Corner (Hidden in forms) */}
-          {!(pathname.includes("/admin/productos/crear") || pathname.includes("/admin/productos/editar")) && (
-            <div className="fixed lg:absolute bottom-6 right-6 opacity-[0.15] pointer-events-none select-none z-10 transition-all duration-500 group-hover:opacity-30 group-hover:scale-110">
-              <Image 
-                src="/logo-sitiohoy.png" 
-                alt="SitioHoy Logo" 
-                width={100} 
-                height={100} 
-                className="object-contain"
-              />
-            </div>
-          )}
-          
+          {/* Content without floating logo */}
           <div className="p-6 md:p-10 lg:p-12">
             {children}
           </div>

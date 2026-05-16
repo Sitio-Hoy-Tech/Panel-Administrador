@@ -30,10 +30,26 @@ export function ProductEditForm({ product, categories }: ProductEditFormProps) {
   const [isSale, setIsSale] = useState(product.is_sale || false);
   const [error, setError] = useState<string | null>(null);
   
-  const [existingImages] = useState(product.product_images || []);
-  
-  const [newImages, setNewImages] = useState<File[]>([]);
-  const [newPreviewUrls, setNewPreviewUrls] = useState<string[]>([]);
+  interface DisplayImage {
+    id: string;
+    isExisting: boolean;
+    url: string;
+    dbId?: string;
+    file?: File;
+  }
+
+  const [images, setImages] = useState<DisplayImage[]>(() => {
+    const sorted = [...(product.product_images || [])].sort((a, b) => (a.position || 0) - (b.position || 0));
+    return sorted.map(img => ({
+      id: img.id,
+      isExisting: true,
+      url: img.url,
+      dbId: img.id,
+    }));
+  });
+  const [deletedImageIds, setDeletedImageIds] = useState<string[]>([]);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,10 +78,16 @@ export function ProductEditForm({ product, categories }: ProductEditFormProps) {
         }
       }
 
-      setNewImages(prev => [...prev, ...compressedFiles]);
+      setImages(prev => [
+        ...prev,
+        ...compressedFiles.map((file, i) => ({
+          id: `new-${Date.now()}-${i}`,
+          isExisting: false,
+          url: URL.createObjectURL(file),
+          file,
+        }))
+      ]);
       
-      const addedUrls = compressedFiles.map(file => URL.createObjectURL(file));
-      setNewPreviewUrls(prev => [...prev, ...addedUrls]);
       setIsCompressing(false);
     }
     if (fileInputRef.current) {
@@ -73,12 +95,59 @@ export function ProductEditForm({ product, categories }: ProductEditFormProps) {
     }
   };
 
-  const removeNewImage = (index: number) => {
-    setNewImages(prev => prev.filter((_, i) => i !== index));
-    setNewPreviewUrls(prev => {
-      URL.revokeObjectURL(prev[index]);
-      return prev.filter((_, i) => i !== index);
-    });
+  const removeImage = (index: number) => {
+    const img = images[index];
+    if (img.isExisting && img.dbId) {
+      setDeletedImageIds(prev => [...prev, img.dbId!]);
+    } else if (!img.isExisting) {
+      URL.revokeObjectURL(img.url);
+    }
+    setImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    const imgData = images[index];
+    const newSize = 120;
+    
+    // Crear una imagen limpia para evitar bugs visuales del navegador al clonar elementos complejos
+    const dragImg = document.createElement("img");
+    dragImg.src = imgData.url;
+    dragImg.id = "drag-ghost-clone";
+    dragImg.style.width = `${newSize}px`;
+    dragImg.style.height = `${newSize}px`;
+    dragImg.style.objectFit = "cover";
+    dragImg.style.borderRadius = "16px";
+    dragImg.style.border = "4px solid #ffffff";
+    dragImg.style.position = "absolute";
+    dragImg.style.top = "-9999px";
+    dragImg.style.left = "-9999px";
+    dragImg.style.zIndex = "9999";
+    dragImg.style.backgroundColor = "#000000";
+    
+    document.body.appendChild(dragImg);
+    e.dataTransfer.setDragImage(dragImg, newSize / 2, newSize / 2);
+    e.dataTransfer.effectAllowed = "move";
+
+    setTimeout(() => setDraggedIndex(index), 0);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === index) return;
+    
+    const newImages = [...images];
+    const draggedImg = newImages[draggedIndex];
+    newImages.splice(draggedIndex, 1);
+    newImages.splice(index, 0, draggedImg);
+    
+    setDraggedIndex(index);
+    setImages(newImages);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+    const clone = document.getElementById("drag-ghost-clone");
+    if (clone) clone.remove();
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -89,9 +158,25 @@ export function ProductEditForm({ product, categories }: ProductEditFormProps) {
     const formData = new FormData(e.currentTarget);
     formData.delete("images");
     
-    newImages.forEach(img => {
-      formData.append("images", img);
+    let newFileCount = 0;
+    const imageOrder = images.map((img, index) => {
+      if (img.isExisting) {
+        return { type: 'existing', id: img.dbId, position: index + 1 };
+      } else {
+        const orderInfo = { type: 'new', fileIndex: newFileCount, position: index + 1 };
+        newFileCount++;
+        return orderInfo;
+      }
     });
+
+    images.forEach(img => {
+      if (!img.isExisting && img.file) {
+        formData.append("images", img.file);
+      }
+    });
+
+    formData.append("deletedImages", JSON.stringify(deletedImageIds));
+    formData.append("imageOrder", JSON.stringify(imageOrder));
 
     const res = await actualizarProducto(product.id, formData);
     
@@ -225,29 +310,27 @@ export function ProductEditForm({ product, categories }: ProductEditFormProps) {
           <label className="text-sm font-medium text-foreground">Fotos</label>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {/* Fotos existentes */}
-            {existingImages.map((img) => (
-              <div key={img.id} className="relative aspect-square rounded-2xl overflow-hidden border border-white/10 opacity-70">
+            {images.map((img, i) => (
+              <div 
+                key={img.id} 
+                draggable
+                onDragStart={(e) => handleDragStart(e, i)}
+                onDragOver={(e) => handleDragOver(e, i)}
+                onDragEnd={handleDragEnd}
+                className={`relative aspect-square rounded-2xl overflow-hidden group border cursor-grab active:cursor-grabbing hover:scale-[1.02] transition-all duration-300 ease-out shadow-sm hover:shadow-md ${draggedIndex === i ? 'opacity-20 scale-95 border-2 border-dashed border-white/30 bg-black/50' : 'opacity-100 border-white/10 bg-black/20'}`}
+              >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={img.url} alt="Producto guardado" className="object-cover w-full h-full" />
-                <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded-md text-[10px] uppercase font-bold tracking-wider text-white">
-                  Guardada
+                <img src={img.url} alt={`Imagen ${i}`} className="object-cover w-full h-full pointer-events-none" />
+                <div className={`absolute top-2 right-2 px-2 py-1 rounded-md text-[10px] uppercase font-bold tracking-wider shadow-lg ${img.isExisting ? 'bg-black/60 backdrop-blur-md text-white' : 'bg-primary text-primary-foreground'}`}>
+                  {img.isExisting ? 'Guardada' : 'Nueva'}
                 </div>
-              </div>
-            ))}
-
-            {/* Nuevas fotos subidas */}
-            {newPreviewUrls.map((url, i) => (
-              <div key={i} className="relative aspect-square rounded-2xl overflow-hidden group border border-white/10">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={url} alt={`Nueva ${i}`} className="object-cover w-full h-full" />
-                <div className="absolute top-2 right-2 bg-primary text-primary-foreground px-2 py-1 rounded-md text-[10px] uppercase font-bold tracking-wider shadow-lg">
-                  Nueva
+                <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded-md text-[10px] uppercase font-bold tracking-wider text-white shadow-lg">
+                  {i + 1}
                 </div>
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                   <button 
                     type="button" 
-                    onClick={() => removeNewImage(i)}
+                    onClick={() => removeImage(i)}
                     className="p-2 bg-red-500/80 text-white rounded-full hover:bg-red-600 hover:scale-110 transition-all"
                   >
                     <X className="h-4 w-4" />
@@ -264,7 +347,7 @@ export function ProductEditForm({ product, categories }: ProductEditFormProps) {
                   <Loader2 className="h-6 w-6 text-primary animate-spin mb-2" />
                   <p className="text-xs text-primary font-medium">Optimizando...</p>
                 </>
-              ) : existingImages.length === 0 && newPreviewUrls.length === 0 ? (
+              ) : images.length === 0 ? (
                 <>
                   <Upload className="h-6 w-6 text-zinc-500 mb-2 group-hover:text-primary group-hover:-translate-y-1 transition-all duration-300" />
                   <p className="text-xs text-foreground font-medium group-hover:text-primary transition-colors">Subir fotos</p>

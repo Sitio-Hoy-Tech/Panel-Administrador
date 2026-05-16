@@ -34,11 +34,12 @@ export async function getProductos() {
       sale_price,
       active,
       is_sale,
+      position,
       product_images!fk_images_product ( url ),
       product_variants!fk_variants_product ( stock )
     `)
     .eq('tenant_id', tenantId)
-    .order('created_at', { ascending: false });
+    .order('position', { ascending: true });
 
   if (error) {
     console.error("Error obteniendo productos:", error);
@@ -60,6 +61,7 @@ export async function getProductos() {
       sale_price: p.sale_price,
       active: p.active,
       is_sale: p.is_sale || false,
+      position: p.position,
       stock: totalStock,
       image: p.product_images && p.product_images.length > 0 ? p.product_images[0].url : null
     };
@@ -107,6 +109,16 @@ export async function crearProducto(formData: FormData) {
   const baseSlug = generateSlug(name);
   const uniqueSlug = baseSlug || crypto.randomUUID();
 
+  // Obtener la posición máxima actual
+  const { data: maxPosData } = await supabase
+    .from('products')
+    .select('position')
+    .eq('tenant_id', tenantId)
+    .order('position', { ascending: false })
+    .limit(1);
+    
+  const position = maxPosData && maxPosData.length > 0 ? (maxPosData[0].position || 0) + 1 : 1;
+
   // 1. Insertar el producto primero
   const { data: productData, error: productError } = await supabase
     .from('products')
@@ -118,7 +130,8 @@ export async function crearProducto(formData: FormData) {
       price,
       sale_price,
       is_sale,
-      active: true
+      active: true,
+      position
     })
     .select()
     .single();
@@ -347,6 +360,8 @@ export async function actualizarProducto(productId: string, formData: FormData) 
   const stock = formData.get("stock") ? parseInt(formData.get("stock") as string) : null;
   const is_sale = formData.get("is_sale") === "true" || formData.get("is_sale") === "on";
   const imageFiles = formData.getAll("images") as File[];
+  const deletedImagesStr = formData.get("deletedImages") as string;
+  const imageOrderStr = formData.get("imageOrder") as string;
 
   if (!name) {
     return { error: "El nombre es obligatorio." };
@@ -404,60 +419,103 @@ export async function actualizarProducto(productId: string, formData: FormData) 
       });
   }
 
-  // 2. Si hay nuevas imágenes, agregarlas
-  if (imageFiles && imageFiles.length > 0) {
-    // Buscar la posición máxima actual
-    const { data: existingImages } = await supabase
-      .from('product_images')
-      .select('position')
-      .eq('product_id', productId)
-      .order('position', { ascending: false })
-      .limit(1);
-      
-    let position = existingImages && existingImages.length > 0 ? existingImages[0].position + 1 : 0;
+  // 2. Manejar eliminación de imágenes
+  if (deletedImagesStr) {
+    try {
+      const deletedImageIds = JSON.parse(deletedImagesStr) as string[];
+      if (deletedImageIds.length > 0) {
+        const { data: imagesToDelete } = await supabase
+          .from('product_images')
+          .select('url')
+          .in('id', deletedImageIds)
+          .eq('tenant_id', tenantId);
 
-    for (const imageFile of imageFiles) {
-      if (imageFile.size === 0) continue;
-
-      const fileExt = imageFile.name.split('.').pop();
-      const fileName = `${crypto.randomUUID()}.${fileExt}`;
-      const filePath = `${tenantId}/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('objects')
-        .upload(filePath, imageFile, {
-          cacheControl: '3600',
-          upsert: false
-        });
-
-      if (uploadError) {
-        console.error("Error subiendo nueva imagen:", uploadError);
-        continue;
+        if (imagesToDelete && imagesToDelete.length > 0) {
+          const filePaths = imagesToDelete.map(img => img.url.split('/objects/')[1]).filter(Boolean);
+          if (filePaths.length > 0) {
+            await supabase.storage.from('objects').remove(filePaths);
+          }
+        }
+        
+        await supabase
+          .from('product_images')
+          .delete()
+          .in('id', deletedImageIds)
+          .eq('tenant_id', tenantId);
       }
+    } catch (e) {
+      console.error("Error al eliminar imágenes:", e);
+    }
+  }
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('objects')
-        .getPublicUrl(filePath);
+  // 3. Manejar reordenamiento e inserción de imágenes
+  let imageOrder: any[] = [];
+  if (imageOrderStr) {
+    try {
+      imageOrder = JSON.parse(imageOrderStr);
+    } catch (e) {
+      console.error("Error parsing imageOrder", e);
+    }
+  }
 
-      const { error: imageError } = await supabase
+  // Actualizar posiciones de imágenes existentes
+  for (const item of imageOrder) {
+    if (item.type === 'existing') {
+      await supabase
         .from('product_images')
-        .insert({
-          tenant_id: tenantId,
-          product_id: productId,
-          url: publicUrl,
-          position: position
-        });
+        .update({ position: item.position })
+        .eq('id', item.id)
+        .eq('tenant_id', tenantId);
+    }
+  }
 
-      if (imageError) {
-        console.error("Error guardando referencia de imagen:", imageError);
-      } else {
-        position++;
-      }
+  // Subir nuevas imágenes con su posición
+  if (imageFiles && imageFiles.length > 0) {
+    for (let i = 0; i < imageFiles.length; i++) {
+      const file = imageFiles[i];
+      if (file.size === 0) continue;
+
+      const orderInfo = imageOrder.find(o => o.type === 'new' && o.fileIndex === i);
+      const position = orderInfo ? orderInfo.position : 999;
+
+      const filePath = `${tenantId}/${crypto.randomUUID()}.${file.name.split('.').pop()}`;
+      const { error: upErr } = await supabase.storage.from('objects').upload(filePath, file);
+      if (upErr) continue;
+
+      const { data: { publicUrl } } = supabase.storage.from('objects').getPublicUrl(filePath);
+      await supabase.from('product_images').insert({
+        tenant_id: tenantId,
+        product_id: productId,
+        url: publicUrl,
+        position: position
+      });
     }
   }
 
   revalidatePath("/productos");
   revalidatePath("/");
   
+  return { success: true };
+}
+
+export async function reordenarProductos(updates: { id: string; position: number }[]) {
+  const tenantId = await getCurrentTenant();
+  
+  if (!tenantId) {
+    return { error: "No autorizado" };
+  }
+
+  const supabase = await createClient();
+
+  // Actualizar las posiciones individualmente (para volúmenes de paginación es rápido)
+  for (const update of updates) {
+    await supabase
+      .from('products')
+      .update({ position: update.position })
+      .eq('id', update.id)
+      .eq('tenant_id', tenantId);
+  }
+
+  revalidatePath("/admin/productos");
   return { success: true };
 }
