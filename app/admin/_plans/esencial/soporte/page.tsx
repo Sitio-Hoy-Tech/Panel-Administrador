@@ -1,4 +1,5 @@
 import { HelpCircle, ExternalLink, Lightbulb, MessageCircle } from "lucide-react";
+import { SupportContactForm } from "@/components/shared/SupportContactForm";
 
 export default function SoportePage() {
   return (
@@ -51,6 +52,8 @@ export default function SoportePage() {
           </ul>
         </div>
       </div>
+
+      <SupportContactForm />
     </div>
   );
 }

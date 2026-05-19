@@ -1,4 +1,5 @@
 import { ExternalLink, Lightbulb, MessageCircle, ShoppingCart, BarChart3 } from "lucide-react";
+import { SupportContactForm } from "@/components/shared/SupportContactForm";
 
 export default function SoportePage() {
   return (
@@ -55,6 +56,8 @@ export default function SoportePage() {
           </ul>
         </div>
       </div>
+
+      <SupportContactForm />
     </div>
   );
 }
