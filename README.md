@@ -33,18 +33,61 @@ Para que la detección funcione, la tabla `tenants` debe tener:
 ## Configuración de Entorno
 
 1. Copiar `.env.example` a `.env.local`
-2. Configurar las credenciales de Supabase.
-3. **Variables de Entorno**: Cargá las variables de Supabase y MercadoPago (si aplica) en Vercel.
+2. Completar las variables:
+
+| Variable | Descripción |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | URL del proyecto Supabase |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Clave anon de Supabase |
+| `SUPABASE_SERVICE_ROLE_KEY` | Clave service role (solo servidor, nunca expuesta al cliente) |
+| `STORE_URL` | URL del sitio público del cliente (para revalidar caché) |
+| `STORE_REVALIDATION_SECRET` | Secret compartido para invalidar caché del storefront |
+
+3. En Vercel, cargar las mismas variables bajo los entornos correspondientes.
+
+## Recuperación de Contraseña
+
+El flujo completo de recuperación de contraseña está implementado:
+
+1. **Solicitud desde el panel:** En la sección Configuración → Cambiar Contraseña, el usuario puede hacer click en "Solicitar cambio a SitioHoy". Esto inserta un registro en `contact_messages` con `source = 'password_reset_request'`, visible en el CRM.
+
+2. **Envío del email de recuperación:** Desde el CRM/backend de SitioHoy se llama a:
+   ```ts
+   supabase.auth.resetPasswordForEmail(email, {
+     redirectTo: "https://admin.sitiohoy.com.ar/auth/reset-password"
+   })
+   ```
+
+3. **Página de reset:** El usuario hace click en el email y llega a `/auth/reset-password?code=xxx`. La página intercambia el code por una sesión y muestra el formulario para establecer una nueva contraseña. Al confirmar, redirige a `/admin`.
+
+La URL `https://admin.sitiohoy.com.ar/auth/reset-password` debe estar en la allowlist de **Supabase → Authentication → URL Configuration → Redirect URLs**.
+
+## Soporte y CRM
+
+La sección Soporte de cada plan incluye un formulario de contacto directo con el equipo de SitioHoy. Las consultas se guardan en la tabla `contact_messages` usando el service role (bypasea RLS) con los siguientes valores de `source` para filtrar en el CRM:
+
+| Tipo de consulta | `source` |
+|---|---|
+| Problema técnico | `support_technical` |
+| Configuración del sitio | `support_configuration` |
+| Plan o facturación | `support_billing` |
+| Otra consulta | `support_other` |
+| Solicitud de cambio de contraseña | `password_reset_request` |
+
+Para ver todas las consultas de soporte: `SELECT * FROM contact_messages WHERE source LIKE 'support_%' ORDER BY created_at DESC`.
 
 ## Estructura del Proyecto
 
 ```
 ├── actions/                    # Server Actions por plan
-│   ├── auth.ts                 # Lógica de login/logout unificada
+│   ├── auth.ts                 # Login/logout, cambio y solicitud de reseteo de contraseña
+│   ├── soporte.ts              # Envío de consultas de soporte al CRM
 │   ├── esencial/               # Lógica específica plan Esencial
 │   ├── emprendimiento/         # Lógica específica plan Emprendimiento
 │   └── empresa/                # Lógica específica plan Empresa
 ├── app/
+│   ├── auth/
+│   │   └── reset-password/     # Página de establecer nueva contraseña (flujo Supabase)
 │   └── admin/
 │       ├── _plans/             # Implementaciones completas de cada plan
 │       │   ├── esencial/
@@ -53,11 +96,19 @@ Para que la detección funcione, la tabla `tenants` debe tener:
 │       ├── page.tsx            # Detecta plan via Server-side y renderiza Dashboard
 │       ├── layout.tsx          # Detecta plan via Client-side y renderiza Sidebar
 │       └── [ruta]/             # Wrappers que delegan al plan correspondiente
-├── components/                 # Componentes UI organizados por plan
+├── components/
+│   ├── shared/                 # Componentes reutilizables entre planes
+│   │   ├── ChangePasswordForm.tsx   # Formulario de cambio de contraseña + solicitud a SitioHoy
+│   │   └── SupportContactForm.tsx   # Formulario de soporte con selector de tipo de consulta
+│   ├── esencial/
+│   ├── emprendimiento/
+│   └── empresa/
 ├── lib/
 │   └── plan-config.ts          # Helper central de detección de plan
-└── utils/                      
-    └── auth.ts                 # Funciones core de obtención de Tenant y Plan
+└── utils/
+    ├── auth.ts                 # Funciones core de obtención de Tenant y Plan
+    └── supabase/
+        └── server.ts           # createClient (con sesión) y createAdminClient (service role)
 ```
 
 ## Experiencia Premium
