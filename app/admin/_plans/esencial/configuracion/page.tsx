@@ -2,6 +2,7 @@ import { createClient } from "@/utils/supabase/server";
 import { getCurrentTenant } from "@/utils/auth";
 import { redirect } from "next/navigation";
 import { ConfigForm } from "./ConfigForm";
+import { ChangePasswordForm } from "@/components/shared/ChangePasswordForm";
 
 export default async function ConfiguracionPage() {
   const tenantId = await getCurrentTenant();
@@ -28,6 +29,7 @@ export default async function ConfiguracionPage() {
       </div>
 
       <ConfigForm initialPhone={initialPhone} />
+      <ChangePasswordForm />
     </div>
   );
 }

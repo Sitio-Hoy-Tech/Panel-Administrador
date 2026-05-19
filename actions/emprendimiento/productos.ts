@@ -3,42 +3,28 @@
 import { createClient } from "@/utils/supabase/server";
 import { getCurrentTenant } from "@/utils/auth";
 import { revalidatePath } from "next/cache";
+import { revalidateStorefront } from "@/utils/revalidate-storefront";
 
 function generateSlug(name: string): string {
   return name
     .toLowerCase()
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/gu, "")
+    .replace(/[̀-ͯ]/gu, "")
     .replace(/[^a-z0-9\s-]/g, "")
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
 }
 
-async function revalidateStorefront(tag = "products") {
-  const storeUrl = process.env.STORE_URL;
-  const secret = process.env.STORE_REVALIDATION_SECRET;
-  if (!storeUrl || !secret) return;
-  try {
-    await fetch(`${storeUrl}/api/revalidate`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-revalidation-secret": secret },
-      body: JSON.stringify({ tag }),
-    });
-  } catch {
-    // No bloquear la operación si el sitio público no está disponible
-  }
-}
-
 export async function getProductos() {
   const tenantId = await getCurrentTenant();
-  
+
   if (!tenantId) {
     return { error: "No autorizado" };
   }
 
   const supabase = await createClient();
-  
+
   const { data: productos, error } = await supabase
     .from('products')
     .select(`
@@ -63,8 +49,7 @@ export async function getProductos() {
   }
 
   const formattedProducts = productos.map(p => {
-    // Sumamos el stock de todas las variantes
-    const totalStock = p.product_variants && p.product_variants.length > 0 
+    const totalStock = p.product_variants && p.product_variants.length > 0
       ? p.product_variants.reduce((acc: number, curr: any) => acc + (curr.stock || 0), 0)
       : null;
 
@@ -88,18 +73,18 @@ export async function getProductos() {
 
 export async function crearProducto(formData: FormData) {
   const tenantId = await getCurrentTenant();
-  
+
   if (!tenantId) {
     return { error: "No autorizado" };
   }
 
   const supabase = await createClient();
-  
+
   const { count, error: countError } = await supabase
     .from('products')
     .select('*', { count: 'exact', head: true })
     .eq('tenant_id', tenantId);
-    
+
   if (countError || (count !== null && count >= 200)) {
     return { error: "Alcanzaste el límite de 200 productos de tu plan." };
   }
@@ -121,21 +106,18 @@ export async function crearProducto(formData: FormData) {
     return { error: "El precio es obligatorio y debe ser mayor a 0." };
   }
 
-  // Generar slug único a partir del nombre
   const baseSlug = generateSlug(name);
   const uniqueSlug = baseSlug || crypto.randomUUID();
 
-  // Obtener la posición máxima actual
   const { data: maxPosData } = await supabase
     .from('products')
     .select('position')
     .eq('tenant_id', tenantId)
     .order('position', { ascending: false })
     .limit(1);
-    
+
   const position = maxPosData && maxPosData.length > 0 ? (maxPosData[0].position || 0) + 1 : 1;
 
-  // 1. Insertar el producto
   const { data: productData, error: productError } = await supabase
     .from('products')
     .insert({
@@ -158,7 +140,6 @@ export async function crearProducto(formData: FormData) {
     return { error: "Error al guardar el producto." };
   }
 
-  // 2. Crear una variante por defecto para el stock
   const { error: variantError } = await supabase
     .from('product_variants')
     .insert({
@@ -173,7 +154,6 @@ export async function crearProducto(formData: FormData) {
     console.error("Error creando variante:", variantError);
   }
 
-  // 3. Procesar imágenes
   if (imageFiles && imageFiles.length > 0) {
     let position = 0;
     for (const imageFile of imageFiles) {
@@ -207,7 +187,7 @@ export async function crearProducto(formData: FormData) {
 
   revalidatePath("/admin/productos");
   revalidatePath("/admin");
-  await revalidateStorefront();
+  await revalidateStorefront(tenantId, "products");
 
   return { success: true, data: productData };
 }
@@ -218,10 +198,8 @@ export async function eliminarProducto(productId: string) {
 
   const supabase = await createClient();
 
-  // Borrar variantes primero (aunque hay CASCADE en DB, lo hacemos explícito si no estamos seguros)
   await supabase.from('product_variants').delete().eq('product_id', productId).eq('tenant_id', tenantId);
 
-  // Borrar imágenes del storage
   const { data: images } = await supabase
     .from('product_images')
     .select('url')
@@ -235,10 +213,8 @@ export async function eliminarProducto(productId: string) {
     }
   }
 
-  // Borrar referencias de imágenes
   await supabase.from('product_images').delete().eq('product_id', productId).eq('tenant_id', tenantId);
 
-  // Borrar producto
   const { error } = await supabase
     .from('products')
     .delete()
@@ -249,7 +225,7 @@ export async function eliminarProducto(productId: string) {
 
   revalidatePath("/admin/productos");
   revalidatePath("/admin");
-  await revalidateStorefront();
+  await revalidateStorefront(tenantId, "products");
   return { success: true };
 }
 
@@ -268,7 +244,7 @@ export async function toggleProductoActivo(productId: string, active: boolean) {
 
   revalidatePath("/admin/productos");
   revalidatePath("/admin");
-  await revalidateStorefront();
+  await revalidateStorefront(tenantId, "products");
   return { success: true };
 }
 
@@ -277,7 +253,7 @@ export async function getProductoById(productId: string) {
   if (!tenantId) return { error: "No autorizado" };
 
   const supabase = await createClient();
-  
+
   const { data: producto, error } = await supabase
     .from('products')
     .select(`
@@ -298,17 +274,16 @@ export async function getProductoById(productId: string) {
 
   if (error) return { error: "Error al cargar el producto." };
 
-  // Mapeamos para que la UI de edición simple encuentre el stock
-  const firstVariant = producto.product_variants && producto.product_variants.length > 0 
-    ? producto.product_variants[0] 
+  const firstVariant = producto.product_variants && producto.product_variants.length > 0
+    ? producto.product_variants[0]
     : null;
 
-  return { 
-    success: true, 
+  return {
+    success: true,
     data: {
       ...producto,
       stock: firstVariant?.stock || 0
-    } 
+    }
   };
 }
 
@@ -331,11 +306,9 @@ export async function actualizarProducto(productId: string, formData: FormData) 
 
   if (!name || price <= 0) return { error: "Nombre y precio son obligatorios." };
 
-  // Regenerar slug al actualizar nombre
   const baseSlug = generateSlug(name);
   const updatedSlug = baseSlug || productId;
 
-  // 1. Actualizar producto
   const { error: updateError } = await supabase
     .from('products')
     .update({ name, slug: updatedSlug, description, category_id, price, sale_price, is_sale })
@@ -344,7 +317,6 @@ export async function actualizarProducto(productId: string, formData: FormData) 
 
   if (updateError) return { error: "Error al guardar." };
 
-  // 2. Actualizar stock en la variante principal
   const { data: variants } = await supabase
     .from('product_variants')
     .select('id')
@@ -357,7 +329,6 @@ export async function actualizarProducto(productId: string, formData: FormData) 
       .update({ stock: stock || 0, price: price })
       .eq('id', variants[0].id);
   } else {
-    // Si no existía variante, la creamos
     await supabase
       .from('product_variants')
       .insert({
@@ -369,7 +340,6 @@ export async function actualizarProducto(productId: string, formData: FormData) 
       });
   }
 
-  // 3. Manejar eliminación de imágenes
   if (deletedImagesStr) {
     try {
       const deletedImageIds = JSON.parse(deletedImagesStr) as string[];
@@ -386,7 +356,7 @@ export async function actualizarProducto(productId: string, formData: FormData) 
             await supabase.storage.from('objects').remove(filePaths);
           }
         }
-        
+
         await supabase
           .from('product_images')
           .delete()
@@ -398,7 +368,6 @@ export async function actualizarProducto(productId: string, formData: FormData) 
     }
   }
 
-  // 4. Manejar reordenamiento e inserción de imágenes
   let imageOrder: any[] = [];
   if (imageOrderStr) {
     try {
@@ -408,7 +377,6 @@ export async function actualizarProducto(productId: string, formData: FormData) 
     }
   }
 
-  // Actualizar posiciones de imágenes existentes
   for (const item of imageOrder) {
     if (item.type === 'existing') {
       await supabase
@@ -419,7 +387,6 @@ export async function actualizarProducto(productId: string, formData: FormData) 
     }
   }
 
-  // Subir nuevas imágenes con su posición
   if (imageFiles && imageFiles.length > 0) {
     for (let i = 0; i < imageFiles.length; i++) {
       const file = imageFiles[i];
@@ -444,13 +411,13 @@ export async function actualizarProducto(productId: string, formData: FormData) 
 
   revalidatePath("/admin/productos");
   revalidatePath("/admin");
-  await revalidateStorefront();
+  await revalidateStorefront(tenantId, "products");
   return { success: true };
 }
 
 export async function reordenarProductos(updates: { id: string; position: number }[]) {
   const tenantId = await getCurrentTenant();
-  
+
   if (!tenantId) {
     return { error: "No autorizado" };
   }
@@ -466,5 +433,6 @@ export async function reordenarProductos(updates: { id: string; position: number
   }
 
   revalidatePath("/admin/productos");
+  await revalidateStorefront(tenantId, "products");
   return { success: true };
 }

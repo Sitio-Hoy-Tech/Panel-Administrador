@@ -3,6 +3,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { getCurrentTenant } from "@/utils/auth";
 import { revalidatePath } from "next/cache";
+import { revalidateStorefront } from "@/utils/revalidate-storefront";
 
 export type ActionState = {
   success: boolean;
@@ -38,7 +39,8 @@ export async function updatePhone(prevState: ActionState, formData: FormData): P
 
     revalidatePath("/admin");
     revalidatePath("/admin/configuracion");
-    
+    await revalidateStorefront(tenantId, "tenants");
+
     return { success: true, message: "Teléfono guardado exitosamente." };
   } catch (error) {
     console.error("Error inesperado en updatePhone:", error);
@@ -109,6 +111,7 @@ export async function saveShippingZone(prevState: ActionState, formData: FormDat
     }
 
     revalidatePath("/admin/configuracion");
+    await revalidateStorefront(tenantId, "shipping_zones");
     return { success: true, message: "Zona de envío creada exitosamente." };
   } catch (error) {
     console.error("Error inesperado en saveShippingZone:", error);
@@ -136,5 +139,6 @@ export async function deleteShippingZone(zoneId: string) {
   }
 
   revalidatePath("/admin/configuracion");
+  await revalidateStorefront(tenantId, "shipping_zones");
   return { success: true };
 }

@@ -3,6 +3,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { getCurrentTenant } from "@/utils/auth";
 import { revalidatePath } from "next/cache";
+import { revalidateStorefront } from "@/utils/revalidate-storefront";
 
 function generateSlug(name: string): string {
   return name
@@ -203,8 +204,9 @@ export async function crearProducto(formData: FormData) {
   }
 
   // Revalidar las rutas del frontend
-  revalidatePath("/productos");
-  revalidatePath("/");
+  revalidatePath("/admin/productos");
+  revalidatePath("/admin");
+  await revalidateStorefront(tenantId, "products");
   
   return { success: true, data: productData };
 }
@@ -267,8 +269,9 @@ export async function eliminarProducto(productId: string) {
     return { error: "Error al eliminar el producto." };
   }
 
-  revalidatePath("/productos");
-  revalidatePath("/");
+  revalidatePath("/admin/productos");
+  revalidatePath("/admin");
+  await revalidateStorefront(tenantId, "products");
   
   return { success: true };
 }
@@ -293,8 +296,9 @@ export async function toggleProductoActivo(productId: string, active: boolean) {
     return { error: "Error al actualizar el estado del producto." };
   }
 
-  revalidatePath("/productos");
-  revalidatePath("/");
+  revalidatePath("/admin/productos");
+  revalidatePath("/admin");
+  await revalidateStorefront(tenantId, "products");
   
   return { success: true };
 }
@@ -492,8 +496,9 @@ export async function actualizarProducto(productId: string, formData: FormData) 
     }
   }
 
-  revalidatePath("/productos");
-  revalidatePath("/");
+  revalidatePath("/admin/productos");
+  revalidatePath("/admin");
+  await revalidateStorefront(tenantId, "products");
   
   return { success: true };
 }
@@ -517,5 +522,6 @@ export async function reordenarProductos(updates: { id: string; position: number
   }
 
   revalidatePath("/admin/productos");
+  await revalidateStorefront(tenantId, "products");
   return { success: true };
 }

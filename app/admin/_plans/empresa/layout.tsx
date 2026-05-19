@@ -13,6 +13,7 @@ export default function EmpresaLayout({
 }>) {
   const pathname = usePathname();
   const [userName, setUserName] = useState("Usuario");
+  const [storeUrl, setStoreUrl] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const supabase = createClient();
 
@@ -20,7 +21,6 @@ export default function EmpresaLayout({
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        // Buscar el nombre del negocio desde la tabla tenants
         const { data: userTenant } = await supabase
           .from("user_tenants")
           .select("tenant_id")
@@ -30,17 +30,15 @@ export default function EmpresaLayout({
         if (userTenant?.tenant_id) {
           const { data: tenant } = await supabase
             .from("tenants")
-            .select("name")
+            .select("name, url")
             .eq("id", userTenant.tenant_id)
             .single();
 
-          if (tenant?.name) {
-            setUserName(tenant.name);
-            return;
-          }
+          if (tenant?.name) setUserName(tenant.name);
+          if (tenant?.url) setStoreUrl(tenant.url);
+          if (tenant?.name) return;
         }
 
-        // Fallback al email si no se encuentra el tenant
         const name = user.email?.split('@')[0] || "Usuario";
         setUserName(name);
       }
@@ -91,7 +89,7 @@ export default function EmpresaLayout({
           transition-transform duration-500 ease-out
           ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}>
-          <Sidebar userName={userName} onLinkClick={() => setIsMobileMenuOpen(false)} />
+          <Sidebar userName={userName} storeUrl={storeUrl} onLinkClick={() => setIsMobileMenuOpen(false)} />
         </div>
       </div>
 

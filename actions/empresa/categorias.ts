@@ -3,6 +3,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { getCurrentTenant } from "@/utils/auth";
 import { revalidatePath } from "next/cache";
+import { revalidateStorefront } from "@/utils/revalidate-storefront";
 
 export async function getCategorias() {
   const tenantId = await getCurrentTenant();
@@ -42,6 +43,7 @@ export async function crearCategoria(formData: FormData) {
 
   revalidatePath("/admin/categorias");
   revalidatePath("/admin/productos");
+  await revalidateStorefront(tenantId, "categories");
   return { success: true };
 }
 
@@ -65,6 +67,7 @@ export async function actualizarCategoria(id: string, formData: FormData) {
 
   revalidatePath("/admin/categorias");
   revalidatePath("/admin/productos");
+  await revalidateStorefront(tenantId, "categories");
   return { success: true };
 }
 
@@ -86,5 +89,6 @@ export async function eliminarCategoria(id: string) {
 
   revalidatePath("/admin/categorias");
   revalidatePath("/admin/productos");
+  await revalidateStorefront(tenantId, "categories");
   return { success: true };
 }

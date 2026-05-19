@@ -2,6 +2,7 @@ import { createClient } from "@/utils/supabase/server";
 import { getCurrentTenant } from "@/utils/auth";
 import { redirect } from "next/navigation";
 import { ConfigForm } from "./ConfigForm";
+import { ChangePasswordForm } from "@/components/shared/ChangePasswordForm";
 import { getShippingZones } from "@/actions/empresa/configuracion";
 
 export default async function ConfiguracionPage() {
@@ -32,6 +33,7 @@ export default async function ConfiguracionPage() {
       </div>
 
       <ConfigForm initialPhone={initialPhone} shippingZones={zones || []} />
+      <ChangePasswordForm />
     </div>
   );
 }

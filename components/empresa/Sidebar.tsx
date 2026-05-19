@@ -23,7 +23,7 @@ const secondaryNavigation = [
   { name: "Soporte", href: "/admin/soporte", icon: HelpCircle },
 ];
 
-export function Sidebar({ userName, onLinkClick }: { userName?: string, onLinkClick?: () => void }) {
+export function Sidebar({ userName, storeUrl, onLinkClick }: { userName?: string, storeUrl?: string | null, onLinkClick?: () => void }) {
   const pathname = usePathname();
 
   return (
@@ -115,11 +115,12 @@ export function Sidebar({ userName, onLinkClick }: { userName?: string, onLinkCl
 
         <div className="space-y-1">
           <a
-            href="#"
+            href={storeUrl ?? "#"}
             target="_blank"
             rel="noopener noreferrer"
             onClick={onLinkClick}
-            className="group flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-400 hover:bg-white/[0.03] hover:text-foreground transition-all duration-300"
+            aria-disabled={!storeUrl}
+            className={`group flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-300 ${storeUrl ? "text-zinc-400 hover:bg-white/[0.03] hover:text-foreground" : "text-zinc-600 cursor-not-allowed pointer-events-none"}`}
           >
             <span className="flex items-center gap-3">
               <ExternalLink className="h-5 w-5 flex-shrink-0 text-zinc-500 group-hover:text-zinc-300 transition-colors" />
