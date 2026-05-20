@@ -5,7 +5,16 @@ import EsencialDashboard from "./_plans/esencial/DashboardPage";
 import EmprendimientoDashboard from "./_plans/emprendimiento/DashboardPage";
 import EmpresaDashboard from "./_plans/empresa/DashboardPage";
 
-export default async function Dashboard() {
+interface PageProps {
+  searchParams: Promise<{ code?: string }>;
+}
+
+export default async function Dashboard({ searchParams }: PageProps) {
+  const { code } = await searchParams;
+  if (code) {
+    redirect(`/auth/reset-password?code=${code}`);
+  }
+
   const tenantData = await getCurrentTenantWithPlan();
 
   if (!tenantData) {
