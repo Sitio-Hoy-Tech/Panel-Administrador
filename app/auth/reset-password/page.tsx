@@ -1,15 +1,14 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import Image from "next/image";
-import { KeyRound, Eye, EyeOff, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
+import { KeyRound, Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
 
 type Status = "loading" | "ready" | "error";
 
 function ResetPasswordContent() {
-  const searchParams = useSearchParams();
   const router = useRouter();
 
   const [status, setStatus] = useState<Status>("loading");
@@ -24,15 +23,20 @@ function ResetPasswordContent() {
   const [submitError, setSubmitError] = useState("");
 
   useEffect(() => {
-    const code = searchParams.get("code");
-    if (!code) {
+    const hash = window.location.hash.substring(1);
+    const params = new URLSearchParams(hash);
+    const accessToken = params.get("access_token");
+    const refreshToken = params.get("refresh_token");
+    const type = params.get("type");
+
+    if (type !== "recovery" || !accessToken || !refreshToken) {
       setLinkError("El enlace no es válido o está incompleto.");
       setStatus("error");
       return;
     }
 
     const supabase = createClient();
-    supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
+    supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken }).then(({ error }) => {
       if (error) {
         setLinkError("El enlace expiró o ya fue utilizado. Solicitá uno nuevo.");
         setStatus("error");
@@ -40,7 +44,7 @@ function ResetPasswordContent() {
         setStatus("ready");
       }
     });
-  }, [searchParams]);
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
