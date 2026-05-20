@@ -85,7 +85,7 @@ function ResetPasswordContent() {
         <h2 className="mt-2 text-center text-3xl font-bold tracking-tight text-white drop-shadow-md">
           Nueva contraseña
         </h2>
-        <p className="mt-2 text-center text-sm text-zinc-400">
+        <p className="mt-2 text-center text-sm text-slate-400">
           Elegí una contraseña segura para tu panel de administración.
         </p>
       </div>
@@ -96,7 +96,7 @@ function ResetPasswordContent() {
 
           {/* Loading */}
           {status === "loading" && (
-            <div className="flex flex-col items-center gap-3 py-8 text-zinc-400">
+            <div className="flex flex-col items-center gap-3 py-8 text-slate-400">
               <Loader2 className="h-8 w-8 animate-spin" />
               <p className="text-sm">Verificando enlace...</p>
             </div>
@@ -107,7 +107,7 @@ function ResetPasswordContent() {
             <div className="flex flex-col items-center gap-4 py-8 text-center">
               <AlertCircle className="h-10 w-10 text-red-400" />
               <p className="text-white font-semibold">Enlace inválido</p>
-              <p className="text-sm text-zinc-400">{linkError}</p>
+              <p className="text-sm text-slate-400">{linkError}</p>
             </div>
           )}
 
@@ -122,7 +122,7 @@ function ResetPasswordContent() {
               )}
 
               <div className="space-y-2">
-                <label htmlFor="new_password" className="block text-sm font-medium text-zinc-300">
+                <label htmlFor="new_password" className="block text-sm font-medium text-slate-300">
                   Nueva contraseña
                 </label>
                 <div className="relative">
@@ -139,18 +139,18 @@ function ResetPasswordContent() {
                   <button
                     type="button"
                     onClick={() => setShowNew((v) => !v)}
-                    className="absolute right-3 top-3.5 text-zinc-500 hover:text-zinc-300 transition-colors"
+                    className="absolute right-3 top-3.5 text-slate-500 hover:text-slate-300 transition-colors"
                     tabIndex={-1}
                     aria-label={showNew ? "Ocultar" : "Mostrar"}
                   >
                     {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
-                <p className="text-xs text-zinc-500">Mínimo 6 caracteres.</p>
+                <p className="text-xs text-slate-500">Mínimo 6 caracteres.</p>
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="confirm_password" className="block text-sm font-medium text-zinc-300">
+                <label htmlFor="confirm_password" className="block text-sm font-medium text-slate-300">
                   Confirmar contraseña
                 </label>
                 <div className="relative">
@@ -167,7 +167,7 @@ function ResetPasswordContent() {
                   <button
                     type="button"
                     onClick={() => setShowConfirm((v) => !v)}
-                    className="absolute right-3 top-3.5 text-zinc-500 hover:text-zinc-300 transition-colors"
+                    className="absolute right-3 top-3.5 text-slate-500 hover:text-slate-300 transition-colors"
                     tabIndex={-1}
                     aria-label={showConfirm ? "Ocultar" : "Mostrar"}
                   >
@@ -180,7 +180,7 @@ function ResetPasswordContent() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full flex items-center justify-center gap-2 bg-white text-black hover:bg-zinc-200 transition-colors py-3 shadow-[0_0_20px_rgba(255,255,255,0.1)] rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex items-center justify-center gap-2 bg-white text-black hover:bg-slate-200 transition-colors py-3 shadow-[0_0_20px_rgba(255,255,255,0.1)] rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {submitting ? <Loader2 className="h-5 w-5 animate-spin" /> : <KeyRound className="h-5 w-5" />}
                   {submitting ? "Actualizando..." : "Establecer contraseña"}
@@ -198,7 +198,7 @@ export default function ResetPasswordPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen w-full flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
+        <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
       </div>
     }>
       <ResetPasswordContent />

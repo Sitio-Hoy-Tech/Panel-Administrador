@@ -223,7 +223,7 @@ export function ProductEditForm({ product }: ProductEditFormProps) {
               prefix="$"
               suppressHydrationWarning={true}
             />
-            <p className="text-xs text-zinc-500">Se mostrará en la web, pero el cobro se coordinará por WhatsApp.</p>
+            <p className="text-xs text-slate-500">Se mostrará en la web, pero el cobro se coordinará por WhatsApp.</p>
           </div>
 
           <div className="space-y-2 flex flex-col justify-center">
@@ -242,7 +242,7 @@ export function ProductEditForm({ product }: ProductEditFormProps) {
                 <div className="w-11 h-6 bg-red-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
               </div>
             </label>
-            <p className="text-xs text-zinc-500">Si está activo, mostrará un distintivo en la tienda.</p>
+            <p className="text-xs text-slate-500">Si está activo, mostrará un distintivo en la tienda.</p>
           </div>
         </div>
 
@@ -260,7 +260,7 @@ export function ProductEditForm({ product }: ProductEditFormProps) {
               prefix="$"
               suppressHydrationWarning={true}
             />
-            <p className="text-xs text-zinc-500">El precio final que pagará el cliente. El precio original aparecerá tachado.</p>
+            <p className="text-xs text-slate-500">El precio final que pagará el cliente. El precio original aparecerá tachado.</p>
           </div>
         )}
 
@@ -275,7 +275,7 @@ export function ProductEditForm({ product }: ProductEditFormProps) {
             placeholder="Ej. 10"
             disabled={isPending}
           />
-          <p className="text-xs text-zinc-500">Indicá cuántas unidades tenés disponibles.</p>
+          <p className="text-xs text-slate-500">Indicá cuántas unidades tenés disponibles.</p>
         </div>
 
         <div className="space-y-2">
@@ -303,7 +303,7 @@ export function ProductEditForm({ product }: ProductEditFormProps) {
                 onDragStart={(e) => handleDragStart(e, i)}
                 onDragOver={(e) => handleDragOver(e, i)}
                 onDragEnd={handleDragEnd}
-                className={`relative aspect-square rounded-2xl overflow-hidden group border cursor-grab active:cursor-grabbing hover:scale-[1.02] transition-all duration-300 ease-out shadow-sm hover:shadow-md ${draggedIndex === i ? 'opacity-20 scale-95 border-2 border-dashed border-white/30 bg-black/50' : 'opacity-100 border-white/10 bg-black/20'}`}
+                className={`relative aspect-square rounded-2xl overflow-hidden group border cursor-grab active:cursor-grabbing hover:scale-[1.02] transition-all duration-300 ease-out shadow-sm hover:shadow-md ${draggedIndex === i ? 'opacity-20 scale-95 border-2 border-dashed border-white/30 bg-black/50' : 'opacity-100 border-white/[0.07] bg-black/20'}`}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={img.url} alt={`Imagen ${i}`} className="object-cover w-full h-full pointer-events-none" />
@@ -325,7 +325,7 @@ export function ProductEditForm({ product }: ProductEditFormProps) {
               </div>
             ))}
 
-            <label className={`aspect-square border-2 border-dashed border-white/10 bg-background/30 rounded-2xl flex flex-col items-center justify-center text-center transition-all duration-300 relative overflow-hidden group ${isCompressing ? 'opacity-50 cursor-wait' : 'hover:bg-white/[0.02] hover:border-primary/30 cursor-pointer'}`}>
+            <label className={`aspect-square border-2 border-dashed border-white/[0.07] bg-background/30 rounded-2xl flex flex-col items-center justify-center text-center transition-all duration-300 relative overflow-hidden group ${isCompressing ? 'opacity-50 cursor-wait' : 'hover:bg-white/[0.02] hover:border-primary/30 cursor-pointer'}`}>
               <div className="absolute inset-0 bg-gradient-to-b from-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
               {isCompressing ? (
@@ -335,13 +335,13 @@ export function ProductEditForm({ product }: ProductEditFormProps) {
                 </>
               ) : images.length === 0 ? (
                 <>
-                  <Upload className="h-6 w-6 text-zinc-500 mb-2 group-hover:text-primary group-hover:-translate-y-1 transition-all duration-300" />
+                  <Upload className="h-6 w-6 text-slate-500 mb-2 group-hover:text-primary group-hover:-translate-y-1 transition-all duration-300" />
                   <p className="text-xs text-foreground font-medium group-hover:text-primary transition-colors">Subir fotos</p>
                 </>
               ) : (
                 <>
-                  <ImagePlus className="h-6 w-6 text-zinc-500 mb-2 group-hover:text-primary transition-all duration-300" />
-                  <p className="text-xs text-zinc-500 font-medium">Añadir foto</p>
+                  <ImagePlus className="h-6 w-6 text-slate-500 mb-2 group-hover:text-primary transition-all duration-300" />
+                  <p className="text-xs text-slate-500 font-medium">Añadir foto</p>
                 </>
               )}
               <input
@@ -356,20 +356,20 @@ export function ProductEditForm({ product }: ProductEditFormProps) {
               />
             </label>
           </div>
-          <p className="text-xs text-zinc-500 mt-2">Puedes añadir más imágenes. PNG, JPG o WEBP se optimizan automáticamente.</p>
+          <p className="text-xs text-slate-500 mt-2">Puedes añadir más imágenes. PNG, JPG o WEBP se optimizan automáticamente.</p>
         </div>
 
-        <div className="pt-6 mt-8 border-t border-white/5 flex justify-end gap-4 relative z-10">
+        <div className="pt-6 mt-8 border-t border-white/[0.05] flex justify-end gap-4 relative z-10">
           <Link
             href="/admin/productos"
-            className="px-6 py-3 rounded-lg font-medium text-zinc-400 hover:text-foreground hover:bg-white/5 transition-colors"
+            className="px-6 py-3 rounded-lg font-medium text-slate-400 hover:text-foreground hover:bg-white/5 transition-colors"
           >
             Cancelar
           </Link>
           <button
             type="submit"
             disabled={isPending || isCompressing}
-            className="flex items-center gap-2 bg-white text-black px-6 py-3 rounded-lg font-semibold hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-white/10"
+            className="flex items-center gap-2 bg-white text-black px-6 py-3 rounded-lg font-semibold hover:bg-slate-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-white/10"
           >
             {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
             {isPending ? "Guardando..." : "Guardar Cambios"}

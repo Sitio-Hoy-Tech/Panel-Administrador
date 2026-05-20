@@ -64,11 +64,11 @@ export function CustomDatePicker({ value, onChange, label, placeholder = "Selecc
 
   const renderHeader = () => {
     return (
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.05]">
         <button
           type="button"
           onClick={prevMonth}
-          className="p-1.5 hover:bg-white/5 rounded-lg text-zinc-400 hover:text-white transition-colors"
+          className="p-1.5 hover:bg-white/5 rounded-lg text-slate-400 hover:text-white transition-colors"
         >
           <ChevronLeft className="h-5 w-5" />
         </button>
@@ -78,7 +78,7 @@ export function CustomDatePicker({ value, onChange, label, placeholder = "Selecc
         <button
           type="button"
           onClick={nextMonth}
-          className="p-1.5 hover:bg-white/5 rounded-lg text-zinc-400 hover:text-white transition-colors"
+          className="p-1.5 hover:bg-white/5 rounded-lg text-slate-400 hover:text-white transition-colors"
         >
           <ChevronRight className="h-5 w-5" />
         </button>
@@ -91,7 +91,7 @@ export function CustomDatePicker({ value, onChange, label, placeholder = "Selecc
     return (
       <div className="grid grid-cols-7 mb-2 px-2">
         {days.map((day) => (
-          <div key={day} className="text-[10px] font-bold text-zinc-500 uppercase text-center py-2">
+          <div key={day} className="text-[10px] font-bold text-slate-500 uppercase text-center py-2">
             {day}
           </div>
         ))}
@@ -124,11 +124,11 @@ export function CustomDatePicker({ value, onChange, label, placeholder = "Selecc
               onClick={() => onDateClick(day)}
               className={clsx(
                 "h-9 w-9 rounded-xl flex items-center justify-center text-sm transition-all relative",
-                !isCurrentMonth ? "text-zinc-600 opacity-30" : "text-zinc-300",
+                !isCurrentMonth ? "text-slate-600 opacity-30" : "text-slate-300",
                 isSelected 
                   ? "bg-white text-black font-bold shadow-lg shadow-white/10" 
                   : "hover:bg-white/10",
-                isToday && !isSelected && "text-white border border-white/20"
+                isToday && !isSelected && "text-white border border-white/[0.07]"
               )}
             >
               {format(day, "d")}
@@ -142,7 +142,7 @@ export function CustomDatePicker({ value, onChange, label, placeholder = "Selecc
   return (
     <div className="relative w-full" ref={containerRef}>
       {label && (
-        <label className="block text-xs font-medium text-zinc-400 mb-1">
+        <label className="block text-xs font-medium text-slate-400 mb-1">
           {label}
         </label>
       )}
@@ -151,17 +151,17 @@ export function CustomDatePicker({ value, onChange, label, placeholder = "Selecc
         onClick={() => setIsOpen(!isOpen)}
         className={clsx(
           "glass-input w-full flex items-center justify-between py-3 px-4 cursor-pointer group transition-all",
-          isOpen ? "ring-2 ring-white/10 border-white/20" : "hover:border-white/10"
+          isOpen ? "ring-2 ring-white/10 border-white/[0.07]" : "hover:border-white/[0.07]"
         )}
       >
         <div className="flex items-center gap-3">
           <CalendarIcon className={clsx(
             "h-4 w-4 transition-colors",
-            selectedDate ? "text-white" : "text-zinc-500 group-hover:text-zinc-400"
+            selectedDate ? "text-white" : "text-slate-500 group-hover:text-slate-400"
           )} />
           <span className={clsx(
             "text-base transition-colors",
-            selectedDate ? "text-white font-medium" : "text-zinc-500"
+            selectedDate ? "text-white font-medium" : "text-slate-500"
           )}>
             {selectedDate ? format(selectedDate, "dd 'de' MMMM, yyyy", { locale: es }) : placeholder}
           </span>
@@ -174,7 +174,7 @@ export function CustomDatePicker({ value, onChange, label, placeholder = "Selecc
               e.stopPropagation();
               onChange("");
             }}
-            className="p-1 hover:bg-white/10 rounded-full transition-colors text-zinc-500 hover:text-white"
+            className="p-1 hover:bg-white/10 rounded-full transition-colors text-slate-500 hover:text-white"
           >
             <X className="h-3 w-3" />
           </button>
@@ -184,7 +184,7 @@ export function CustomDatePicker({ value, onChange, label, placeholder = "Selecc
       {isOpen && (
         <div 
           ref={calendarRef}
-          className="absolute top-full left-0 mt-2 z-[100] w-full min-w-[310px] bg-[#0A0A0A] border border-white/10 rounded-2xl shadow-2xl backdrop-blur-3xl animate-in fade-in zoom-in-95 duration-200"
+          className="absolute top-full left-0 mt-2 z-[100] w-full min-w-[310px] bg-slate-900/90 border border-white/[0.07] rounded-2xl shadow-2xl backdrop-blur-3xl animate-in fade-in zoom-in-95 duration-200"
         >
           {renderHeader()}
           <div className="p-1">
@@ -192,7 +192,7 @@ export function CustomDatePicker({ value, onChange, label, placeholder = "Selecc
             {renderCells()}
           </div>
           
-          <div className="p-3 border-t border-white/5 bg-white/[0.02] flex justify-between items-center">
+          <div className="p-3 border-t border-white/[0.05] bg-white/[0.02] flex justify-between items-center">
             <button
               type="button"
               onClick={() => {
@@ -200,7 +200,7 @@ export function CustomDatePicker({ value, onChange, label, placeholder = "Selecc
                 onChange(format(today, "yyyy-MM-dd"));
                 setIsOpen(false);
               }}
-              className="text-xs font-bold text-zinc-400 hover:text-white transition-colors"
+              className="text-xs font-bold text-slate-400 hover:text-white transition-colors"
             >
               Hoy
             </button>

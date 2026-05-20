@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { LayoutDashboard, Package, Settings, LogOut, ExternalLink, HelpCircle, CreditCard } from "lucide-react";
+import { LayoutDashboard, Package, Settings, LogOut, ExternalLink, HelpCircle, CreditCard, Clock } from "lucide-react";
 import clsx from "clsx";
 import { logout } from "@/actions/auth";
 
@@ -26,8 +26,8 @@ export function Sidebar({ userName, storeUrl, onLinkClick }: { userName?: string
       {/* Remove decorative top gradient since it's floating now */}
 
       <div className="flex items-center gap-3 px-4 mb-10">
-        <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-white to-zinc-400 flex items-center justify-center shadow-lg shadow-white/10 flex-shrink-0">
-          <span className="text-black font-bold text-lg">
+        <div className="h-9 w-9 rounded-full bg-gradient-to-tr from-emerald-500/20 via-teal-500/25 to-emerald-400/10 flex items-center justify-center border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.15)] flex-shrink-0">
+          <span className="text-emerald-400 font-bold text-base drop-shadow-[0_0_6px_rgba(16,185,129,0.4)]">
             {userName ? userName.charAt(0).toUpperCase() : 'S'}
           </span>
         </div>
@@ -49,7 +49,7 @@ export function Sidebar({ userName, storeUrl, onLinkClick }: { userName?: string
                     "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-300",
                     isActive
                       ? "bg-gradient-to-r from-primary/10 to-transparent text-primary"
-                      : "text-zinc-400 hover:bg-white/[0.03] hover:text-foreground"
+                      : "text-slate-400 hover:bg-white/[0.03] hover:text-foreground"
                   )}
                 >
                   {isActive && (
@@ -58,7 +58,7 @@ export function Sidebar({ userName, storeUrl, onLinkClick }: { userName?: string
                   <item.icon
                     className={clsx(
                       "h-5 w-5 flex-shrink-0 transition-colors",
-                      isActive ? "text-primary" : "text-zinc-500 group-hover:text-zinc-300"
+                      isActive ? "text-primary" : "text-slate-500 group-hover:text-slate-300"
                     )}
                     aria-hidden="true"
                   />
@@ -70,7 +70,7 @@ export function Sidebar({ userName, storeUrl, onLinkClick }: { userName?: string
         </ul>
 
         <div>
-          <div className="px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-600 mb-3">
+          <div className="px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-600 mb-3">
             Cuenta
           </div>
           <ul className="space-y-1.5">
@@ -85,7 +85,7 @@ export function Sidebar({ userName, storeUrl, onLinkClick }: { userName?: string
                       "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-300",
                       isActive
                         ? "bg-gradient-to-r from-primary/10 to-transparent text-primary"
-                        : "text-zinc-400 hover:bg-white/[0.03] hover:text-foreground"
+                        : "text-slate-400 hover:bg-white/[0.03] hover:text-foreground"
                     )}
                   >
                     {isActive && (
@@ -94,7 +94,7 @@ export function Sidebar({ userName, storeUrl, onLinkClick }: { userName?: string
                     <item.icon
                       className={clsx(
                         "h-5 w-5 flex-shrink-0 transition-colors",
-                        isActive ? "text-primary" : "text-zinc-500 group-hover:text-zinc-300"
+                        isActive ? "text-primary" : "text-slate-500 group-hover:text-slate-300"
                       )}
                       aria-hidden="true"
                     />
@@ -110,25 +110,32 @@ export function Sidebar({ userName, storeUrl, onLinkClick }: { userName?: string
       <div className="mt-auto pt-6 flex flex-col gap-2">
 
         <div className="space-y-1">
-          <a
-            href={storeUrl ?? "#"}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={onLinkClick}
-            aria-disabled={!storeUrl}
-            className={`group flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-300 ${storeUrl ? "text-zinc-400 hover:bg-white/[0.03] hover:text-foreground" : "text-zinc-600 cursor-not-allowed pointer-events-none"}`}
+          {storeUrl === undefined ? null : storeUrl ? (
+            <a
+              href={storeUrl.startsWith("http") ? storeUrl : `https://${storeUrl}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={onLinkClick}
+              className="group flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium text-slate-400 hover:bg-white/[0.03] hover:text-foreground transition-all duration-300"
+            >
+              <span className="flex items-center gap-3">
+                <ExternalLink className="h-5 w-5 flex-shrink-0 text-slate-500 group-hover:text-slate-300 transition-colors" />
+                Ver mi sitio
+              </span>
+            </a>
+          ) : (
+            <div className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600">
+              <Clock className="h-5 w-5 flex-shrink-0" />
+              <span>Sitio no disponible aún</span>
+            </div>
+          )}
+          <button
+            className="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all duration-300"
+            onClick={async () => { await logout(); window.location.href = "/admin/login"; }}
           >
-            <span className="flex items-center gap-3">
-              <ExternalLink className="h-5 w-5 flex-shrink-0 text-zinc-500 group-hover:text-zinc-300 transition-colors" />
-              Ver mi sitio
-            </span>
-          </a>
-          <form action={logout}>
-            <button className="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-400 hover:bg-red-500/10 hover:text-red-400 transition-all duration-300">
-              <LogOut className="h-5 w-5 flex-shrink-0 group-hover:text-red-400 transition-colors" />
-              Cerrar Sesión
-            </button>
-          </form>
+            <LogOut className="h-5 w-5 flex-shrink-0 group-hover:text-red-400 transition-colors" />
+            Cerrar Sesión
+          </button>
         </div>
       </div>
 

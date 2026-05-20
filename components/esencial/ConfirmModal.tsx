@@ -54,7 +54,7 @@ export function ConfirmModal({
       />
 
       {/* Modal */}
-      <div className="relative bg-surface/90 backdrop-blur-xl border border-white/10 shadow-2xl rounded-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 fade-in duration-200">
+      <div className="relative bg-surface/90 backdrop-blur-xl border border-white/[0.07] shadow-2xl rounded-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 fade-in duration-200">
         <div className="p-6">
           <div className="flex gap-4">
             <div className={`flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full ${isDestructive ? 'bg-red-500/10 text-red-500' : 'bg-primary/10 text-primary'}`}>
@@ -64,19 +64,19 @@ export function ConfirmModal({
               <h3 className="text-lg font-semibold text-foreground tracking-tight">
                 {title}
               </h3>
-              <p className="mt-2 text-sm text-zinc-400 leading-relaxed">
+              <p className="mt-2 text-sm text-slate-400 leading-relaxed">
                 {description}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-black/20 px-6 py-4 flex items-center justify-end gap-3 border-t border-white/5">
+        <div className="bg-black/20 px-6 py-4 flex items-center justify-end gap-3 border-t border-white/[0.05]">
           <button
             type="button"
             onClick={onClose}
             disabled={isPending}
-            className="px-4 py-2 rounded-lg text-sm font-medium text-zinc-300 hover:text-white hover:bg-white/5 transition-colors disabled:opacity-50"
+            className="px-4 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 transition-colors disabled:opacity-50"
           >
             {cancelText}
           </button>
@@ -86,7 +86,7 @@ export function ConfirmModal({
             disabled={isPending}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${isDestructive
                 ? 'bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/20'
-                : 'bg-white hover:bg-zinc-200 text-black shadow-lg shadow-white/10'
+                : 'bg-white hover:bg-slate-200 text-black shadow-lg shadow-white/10'
               }`}
           >
             {isPending && <Loader2 className="w-4 h-4 animate-spin" />}

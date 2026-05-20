@@ -14,7 +14,7 @@ export default function EsencialLayout({
 }>) {
   const pathname = usePathname();
   const [userName, setUserName] = useState("Usuario");
-  const [storeUrl, setStoreUrl] = useState<string | null>(null);
+  const [storeUrl, setStoreUrl] = useState<string | null | undefined>(undefined);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const supabase = createClient();
 
@@ -36,12 +36,13 @@ export default function EsencialLayout({
             .single();
 
           if (tenant?.name) setUserName(tenant.name);
-          if (tenant?.url) setStoreUrl(tenant.url);
+          setStoreUrl(tenant?.url ?? null);
           if (tenant?.name) return;
         }
 
         const name = user.email?.split('@')[0] || "Usuario";
         setUserName(name);
+        setStoreUrl(null);
       }
     };
     getUser();
@@ -53,18 +54,18 @@ export default function EsencialLayout({
   }
 
   return (
-    <div className="flex flex-col lg:flex-row h-svh w-full p-0 lg:p-6 gap-0 lg:gap-6 relative z-10 overflow-hidden bg-black">
+    <div className="flex flex-col lg:flex-row h-svh w-full p-0 lg:p-6 gap-0 lg:gap-6 relative z-10 overflow-hidden bg-transparent">
       {/* Mobile & Tablet Header */}
-      <div className="lg:hidden flex items-center justify-between p-4 bg-[#0A0A0A] border-b border-white/5 relative z-50">
+      <div className="lg:hidden flex items-center justify-between p-4 bg-slate-950/40 backdrop-blur-md border-b border-white/[0.05] relative z-50">
         <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-white to-zinc-400 flex items-center justify-center">
-            <span className="text-black font-bold text-sm">{userName.charAt(0).toUpperCase()}</span>
+          <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-emerald-500/20 via-teal-500/25 to-emerald-400/10 flex items-center justify-center border border-emerald-500/30 shadow-[0_0_12px_rgba(16,185,129,0.15)]">
+            <span className="text-emerald-400 font-bold text-xs drop-shadow-[0_0_4px_rgba(16,185,129,0.4)]">{userName.charAt(0).toUpperCase()}</span>
           </div>
           <span className="font-bold text-white tracking-tight truncate max-w-[150px] md:max-w-none">{userName}</span>
         </div>
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="p-2 text-zinc-400 hover:text-white transition-colors"
+          className="p-2 text-slate-400 hover:text-white transition-colors"
         >
           {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
@@ -86,7 +87,7 @@ export default function EsencialLayout({
         />
 
         <div className={`
-          relative z-50 h-full bg-[#0A0A0A] lg:bg-transparent border-r border-white/5 lg:border-none w-64 flex-shrink-0 
+          relative z-50 h-full bg-slate-950/80 backdrop-blur-xl lg:bg-transparent border-r border-white/[0.05] lg:border-none w-64 flex-shrink-0 
           transition-transform duration-500 ease-out
           ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}>
@@ -95,9 +96,9 @@ export default function EsencialLayout({
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 h-full relative group overflow-hidden lg:p-0">
+      <div className="flex-1 h-full relative group overflow-hidden lg:p-0 lg:rounded-[2rem]">
         <div className="hidden lg:block absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000 rounded-[2.5rem] pointer-events-none"></div>
-        <main className="h-full bg-[#0A0A0A]/80 backdrop-blur-3xl lg:rounded-[2rem] border-x-0 lg:border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.8)] overflow-y-auto hide-scrollbar relative z-10">
+        <main className="h-full bg-slate-950/30 backdrop-blur-md lg:rounded-[2rem] border-x-0 lg:border border-white/[0.07] shadow-[0_0_40px_rgba(0,0,0,0.8)] overflow-y-auto hide-scrollbar relative z-10">
           {/* Content without floating logo */}
           <div className="p-6 md:p-10 lg:p-12">
             {children}

@@ -2,24 +2,15 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { getCurrentTenant } from "@/utils/auth";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { getCuponesCached, TAGS } from "@/utils/cached-queries";
 
 export async function getCupones() {
   const tenantId = await getCurrentTenant();
   if (!tenantId) return { error: "No autorizado" };
 
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from('coupons')
-    .select('*')
-    .eq('tenant_id', tenantId);
-
-  if (error) {
-    console.error("Error obteniendo cupones:", error);
-    return { error: "Error al cargar los cupones." };
-  }
-
+  const data = await getCuponesCached(tenantId);
+  if (!data) return { error: "Error al cargar los cupones." };
   return { success: true, data };
 }
 
@@ -52,6 +43,7 @@ export async function createCupon(cuponData: any) {
     return { error: error.message };
   }
 
+  revalidateTag(TAGS.cupones(tenantId), 'max');
   revalidatePath('/admin/cupones');
   return { success: true, data };
 }
@@ -83,6 +75,7 @@ export async function updateCupon(id: string, cuponData: any) {
     return { error: error.message };
   }
 
+  revalidateTag(TAGS.cupones(tenantId), 'max');
   revalidatePath('/admin/cupones');
   return { success: true, data };
 }
@@ -101,6 +94,7 @@ export async function toggleCuponStatus(id: string, isActive: boolean) {
 
   if (error) return { error: error.message };
   
+  revalidateTag(TAGS.cupones(tenantId), 'max');
   revalidatePath('/admin/cupones');
   return { success: true };
 }
@@ -122,6 +116,7 @@ export async function deleteCupon(id: string) {
     return { error: error.message };
   }
 
+  revalidateTag(TAGS.cupones(tenantId), 'max');
   revalidatePath('/admin/cupones');
   return { success: true };
 }

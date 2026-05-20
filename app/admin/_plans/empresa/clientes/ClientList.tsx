@@ -34,9 +34,9 @@ export function ClientList({ initialClients }: ClientListProps) {
 
   return (
     <div>
-      <div className="p-4 border-b border-white/5 bg-white/[0.02] flex items-center gap-4">
+      <div className="p-4 border-b border-white/[0.05] bg-white/[0.02] flex items-center gap-4">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
           <input
             type="text"
             placeholder="Buscar por nombre o email..."
@@ -46,20 +46,20 @@ export function ClientList({ initialClients }: ClientListProps) {
             suppressHydrationWarning
           />
         </div>
-        <div className="text-xs text-zinc-500 font-medium whitespace-nowrap">
+        <div className="text-xs text-slate-500 font-medium whitespace-nowrap">
           {filteredClients.length} {filteredClients.length === 1 ? 'cliente' : 'clientes'}
         </div>
       </div>
 
       <div className="overflow-x-auto w-full">
         <table className="w-full text-left text-sm whitespace-nowrap min-w-[800px] hidden md:table">
-          <thead className="bg-white/[0.02] border-b border-white/5">
+          <thead className="bg-white/[0.02] border-b border-white/[0.05]">
             <tr>
-              <th className="px-6 py-4 font-medium text-zinc-400">Cliente</th>
-              <th className="px-6 py-4 font-medium text-zinc-400">Total Gastado</th>
-              <th className="px-6 py-4 font-medium text-zinc-400 text-center">Pedidos Totales</th>
-              <th className="px-6 py-4 font-medium text-zinc-400">Última Compra</th>
-              <th className="px-6 py-4 font-medium text-zinc-400 text-right">Acciones</th>
+              <th className="px-6 py-4 font-medium text-slate-400">Cliente</th>
+              <th className="px-6 py-4 font-medium text-slate-400">Total Gastado</th>
+              <th className="px-6 py-4 font-medium text-slate-400 text-center">Pedidos Totales</th>
+              <th className="px-6 py-4 font-medium text-slate-400">Última Compra</th>
+              <th className="px-6 py-4 font-medium text-slate-400 text-right">Acciones</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5">
@@ -73,7 +73,7 @@ export function ClientList({ initialClients }: ClientListProps) {
               ))
             ) : (
               <tr>
-                <td colSpan={5} className="px-6 py-12 text-center text-zinc-500">
+                <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
                   No se encontraron clientes que coincidan con la búsqueda.
                 </td>
               </tr>
@@ -93,7 +93,7 @@ export function ClientList({ initialClients }: ClientListProps) {
               />
             ))
           ) : (
-            <div className="px-6 py-12 text-center text-zinc-500">
+            <div className="px-6 py-12 text-center text-slate-500">
               No se encontraron clientes.
             </div>
           )}

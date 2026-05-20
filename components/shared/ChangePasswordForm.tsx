@@ -25,10 +25,10 @@ export function ChangePasswordForm() {
     <form action={formAction} className="glass-panel p-6 md:p-8 space-y-6">
       <div>
         <h2 className="text-xl font-semibold text-white flex items-center gap-2">
-          <KeyRound className="h-5 w-5 text-blue-400" />
+          <KeyRound className="h-5 w-5 text-emerald-400" />
           Cambiar Contraseña
         </h2>
-        <p className="text-sm text-zinc-400 mt-1">
+        <p className="text-sm text-slate-400 mt-1">
           Actualizá la contraseña de acceso a tu panel de administración.
         </p>
       </div>
@@ -49,7 +49,7 @@ export function ChangePasswordForm() {
 
       <div className="space-y-4">
         <div className="space-y-2">
-          <label htmlFor="current_password" className="text-sm font-medium text-zinc-300">
+          <label htmlFor="current_password" className="text-sm font-medium text-slate-300">
             Contraseña actual
           </label>
           <div className="relative">
@@ -59,13 +59,13 @@ export function ChangePasswordForm() {
               type={showCurrent ? "text" : "password"}
               autoComplete="current-password"
               disabled={isPending}
-              className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 pr-11 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-zinc-700 disabled:opacity-50"
+              className="w-full bg-black/50 border border-white/[0.07] rounded-lg px-4 py-3 pr-11 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all placeholder:text-slate-700 disabled:opacity-50"
               placeholder="••••••••"
             />
             <button
               type="button"
               onClick={() => setShowCurrent((v) => !v)}
-              className="absolute right-3 top-3.5 text-zinc-500 hover:text-zinc-300 transition-colors"
+              className="absolute right-3 top-3.5 text-slate-500 hover:text-slate-300 transition-colors"
               tabIndex={-1}
               aria-label={showCurrent ? "Ocultar contraseña" : "Mostrar contraseña"}
             >
@@ -75,7 +75,7 @@ export function ChangePasswordForm() {
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="new_password" className="text-sm font-medium text-zinc-300">
+          <label htmlFor="new_password" className="text-sm font-medium text-slate-300">
             Nueva contraseña
           </label>
           <div className="relative">
@@ -85,24 +85,24 @@ export function ChangePasswordForm() {
               type={showNew ? "text" : "password"}
               autoComplete="new-password"
               disabled={isPending}
-              className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 pr-11 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-zinc-700 disabled:opacity-50"
+              className="w-full bg-black/50 border border-white/[0.07] rounded-lg px-4 py-3 pr-11 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all placeholder:text-slate-700 disabled:opacity-50"
               placeholder="••••••••"
             />
             <button
               type="button"
               onClick={() => setShowNew((v) => !v)}
-              className="absolute right-3 top-3.5 text-zinc-500 hover:text-zinc-300 transition-colors"
+              className="absolute right-3 top-3.5 text-slate-500 hover:text-slate-300 transition-colors"
               tabIndex={-1}
               aria-label={showNew ? "Ocultar contraseña" : "Mostrar contraseña"}
             >
               {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
-          <p className="text-xs text-zinc-500">Mínimo 6 caracteres.</p>
+          <p className="text-xs text-slate-500">Mínimo 6 caracteres.</p>
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="confirm_password" className="text-sm font-medium text-zinc-300">
+          <label htmlFor="confirm_password" className="text-sm font-medium text-slate-300">
             Confirmar nueva contraseña
           </label>
           <div className="relative">
@@ -112,13 +112,13 @@ export function ChangePasswordForm() {
               type={showConfirm ? "text" : "password"}
               autoComplete="new-password"
               disabled={isPending}
-              className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 pr-11 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-zinc-700 disabled:opacity-50"
+              className="w-full bg-black/50 border border-white/[0.07] rounded-lg px-4 py-3 pr-11 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all placeholder:text-slate-700 disabled:opacity-50"
               placeholder="••••••••"
             />
             <button
               type="button"
               onClick={() => setShowConfirm((v) => !v)}
-              className="absolute right-3 top-3.5 text-zinc-500 hover:text-zinc-300 transition-colors"
+              className="absolute right-3 top-3.5 text-slate-500 hover:text-slate-300 transition-colors"
               tabIndex={-1}
               aria-label={showConfirm ? "Ocultar contraseña" : "Mostrar contraseña"}
             >
@@ -132,15 +132,15 @@ export function ChangePasswordForm() {
         <button
           type="submit"
           disabled={isPending}
-          className="flex items-center gap-2 bg-white text-black px-6 py-3 rounded-lg font-semibold hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 bg-white text-black px-6 py-3 rounded-lg font-semibold hover:bg-slate-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : <KeyRound className="h-5 w-5" />}
           {isPending ? "Actualizando..." : "Actualizar contraseña"}
         </button>
       </div>
 
-      <div className="border-t border-white/10 pt-5">
-        <p className="text-sm text-zinc-500 mb-3 flex items-center gap-1.5">
+      <div className="border-t border-white/[0.07] pt-5">
+        <p className="text-sm text-slate-500 mb-3 flex items-center gap-1.5">
           <HelpCircle className="h-4 w-4 flex-shrink-0" />
           ¿No recordás tu contraseña actual? Podés pedirle al equipo de SitioHoy que te la cambie.
         </p>
@@ -164,7 +164,7 @@ export function ChangePasswordForm() {
             type="button"
             onClick={handleResetRequest}
             disabled={isRequestPending}
-            className="flex items-center gap-2 border border-white/10 text-zinc-300 px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-white/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 border border-white/[0.07] text-slate-300 px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-white/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isRequestPending
               ? <Loader2 className="h-4 w-4 animate-spin" />

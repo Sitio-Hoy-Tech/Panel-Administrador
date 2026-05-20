@@ -28,9 +28,9 @@ export function ProductListTable({
     dragImg.id = "drag-ghost-clone";
     dragImg.style.width = "300px";
     dragImg.style.padding = "16px";
-    dragImg.style.backgroundColor = "#18181b"; // bg-zinc-900
+    dragImg.style.backgroundColor = "#18181b"; // bg-slate-900
     dragImg.style.color = "white";
-    dragImg.style.border = "1px solid #3f3f46"; // border-zinc-700
+    dragImg.style.border = "1px solid #3f3f46"; // border-slate-700
     dragImg.style.borderRadius = "8px";
     dragImg.style.position = "absolute";
     dragImg.style.top = "-9999px";
@@ -91,8 +91,8 @@ export function ProductListTable({
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-left text-sm text-zinc-400 min-w-[600px] md:min-w-0">
-        <thead className="bg-white/[0.02] border-b border-white/5 text-xs uppercase font-semibold text-zinc-500 tracking-wider">
+      <table className="w-full text-left text-sm text-slate-400 min-w-[600px] md:min-w-0">
+        <thead className="bg-white/[0.02] border-b border-white/[0.05] text-xs uppercase font-semibold text-slate-500 tracking-wider">
           <tr>
             <th scope="col" className="px-6 py-4 w-10"></th>
             <th scope="col" className="px-6 py-4">Producto / Servicio</th>
@@ -120,11 +120,11 @@ export function ProductListTable({
               </td>
               <td className="px-6 py-4">
                 <div className="flex items-center gap-4 pointer-events-none">
-                  <div className="h-12 w-12 rounded-xl bg-surface flex items-center justify-center border border-white/5 flex-shrink-0 shadow-inner overflow-hidden relative">
+                  <div className="h-12 w-12 rounded-xl bg-surface flex items-center justify-center border border-white/[0.05] flex-shrink-0 shadow-inner overflow-hidden relative">
                     {prod.image ? (
                       <img src={prod.image} alt={prod.name} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     ) : (
-                      <ImageIcon className="h-5 w-5 text-zinc-600" />
+                      <ImageIcon className="h-5 w-5 text-slate-600" />
                     )}
                     {!prod.active && (
                       <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
@@ -135,30 +135,30 @@ export function ProductListTable({
                   <div>
                     <div className="font-medium text-foreground text-base group-hover:text-primary transition-colors flex items-center gap-2">
                       {prod.name}
-                      {!prod.active && <span className="px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400 text-[10px] uppercase font-bold border border-white/5">Oculto</span>}
+                      {!prod.active && <span className="px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 text-[10px] uppercase font-bold border border-white/[0.05]">Oculto</span>}
                       {prod.is_sale && <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] uppercase font-bold border border-emerald-500/20">En Oferta</span>}
                       {prod.stock !== null && prod.stock > 0 && prod.stock <= 5 && (
                         <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 text-[10px] uppercase font-bold border border-amber-500/20">Últimas Unidades</span>
                       )}
                     </div>
-                    <div className="text-xs mt-1 truncate max-w-[200px] md:max-w-md text-zinc-500">{prod.description}</div>
+                    <div className="text-xs mt-1 truncate max-w-[200px] md:max-w-md text-slate-500">{prod.description}</div>
                   </div>
                 </div>
               </td>
-              <td className="px-6 py-4 font-medium text-zinc-300">
+              <td className="px-6 py-4 font-medium text-slate-300">
                 {prod.is_sale && prod.sale_price ? (
                   <div className="flex flex-col">
-                    <span className="text-zinc-500 line-through text-xs font-normal">${prod.price.toLocaleString("es-AR")}</span>
+                    <span className="text-slate-500 line-through text-xs font-normal">${prod.price.toLocaleString("es-AR")}</span>
                     <span className="text-emerald-400 font-bold">${prod.sale_price.toLocaleString("es-AR")}</span>
                   </div>
                 ) : (
                   <span>${prod.price.toLocaleString("es-AR")}</span>
                 )}
               </td>
-              <td className="px-6 py-4 text-zinc-400">
+              <td className="px-6 py-4 text-slate-400">
                 {prod.stock !== null && prod.stock !== undefined ? (
                   <div className="flex flex-col gap-1">
-                    <span className={`${prod.stock <= 5 ? 'text-amber-400 font-medium' : 'text-zinc-300'}`}>
+                    <span className={`${prod.stock <= 5 ? 'text-amber-400 font-medium' : 'text-slate-300'}`}>
                       {prod.stock} u.
                     </span>
                     {prod.stock === 0 && (
@@ -168,7 +168,7 @@ export function ProductListTable({
                     )}
                   </div>
                 ) : (
-                  <span className="text-zinc-600">—</span>
+                  <span className="text-slate-600">—</span>
                 )}
               </td>
               <td className="px-6 py-4 text-right">

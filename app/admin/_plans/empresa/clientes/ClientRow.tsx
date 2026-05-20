@@ -43,12 +43,12 @@ export function ClientRow({ client, onClick, isMobile = false }: ClientRowProps)
             </div>
             <div>
               <p className="font-bold text-white text-sm">{client.firstName} {client.lastName}</p>
-              <p className="text-xs text-zinc-400">{client.email}</p>
+              <p className="text-xs text-slate-400">{client.email}</p>
             </div>
           </div>
           <div className="text-right">
             <p className="font-bold text-white text-sm">{formattedTotal}</p>
-            <p className="text-xs text-zinc-500">{client.totalOrders} pedidos</p>
+            <p className="text-xs text-slate-500">{client.totalOrders} pedidos</p>
           </div>
         </div>
       </div>
@@ -67,7 +67,7 @@ export function ClientRow({ client, onClick, isMobile = false }: ClientRowProps)
               {client.firstName} {client.lastName}
             </p>
             <div className="flex items-center gap-2 mt-1">
-              <p className="text-xs text-zinc-400 flex items-center gap-1"><Mail className="h-3 w-3" /> {client.email}</p>
+              <p className="text-xs text-slate-400 flex items-center gap-1"><Mail className="h-3 w-3" /> {client.email}</p>
             </div>
           </div>
         </div>
@@ -75,21 +75,21 @@ export function ClientRow({ client, onClick, isMobile = false }: ClientRowProps)
       <td className="px-6 py-4">
         <span className="font-bold text-white">{formattedTotal}</span>
       </td>
-      <td className="px-6 py-4 text-center text-zinc-300">
-        <span className="bg-white/5 px-2.5 py-1 rounded-md text-xs font-medium border border-white/5">
+      <td className="px-6 py-4 text-center text-slate-300">
+        <span className="bg-white/5 px-2.5 py-1 rounded-md text-xs font-medium border border-white/[0.05]">
           {client.totalOrders}
         </span>
       </td>
       <td className="px-6 py-4">
-        <div className="text-sm text-zinc-300 flex items-center gap-2">
-          <Calendar className="h-4 w-4 text-zinc-500" />
+        <div className="text-sm text-slate-300 flex items-center gap-2">
+          <Calendar className="h-4 w-4 text-slate-500" />
           {formattedDate}
         </div>
       </td>
       <td className="px-6 py-4 text-right">
         <button
           onClick={onClick}
-          className="p-2 hover:bg-white/10 rounded-lg text-zinc-400 hover:text-white transition-colors tooltip-trigger relative"
+          className="p-2 hover:bg-white/10 rounded-lg text-slate-400 hover:text-white transition-colors tooltip-trigger relative"
           title="Ver Detalle"
         >
           <Eye className="h-4 w-4" />

@@ -59,14 +59,14 @@ export function ProductFilters({ categories }: { categories: Category[] }) {
         {/* Search Input */}
         <div className="relative flex-1 group">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-4 w-4 text-zinc-500 group-focus-within:text-blue-400 transition-colors" />
+            <Search className="h-4 w-4 text-slate-500 group-focus-within:text-emerald-400 transition-colors" />
           </div>
           <input
             type="text"
             placeholder="Buscar por nombre o descripción..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="block w-full pl-10 pr-3 py-2.5 bg-white/[0.03] border border-white/5 rounded-xl text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
+            className="block w-full pl-10 pr-3 py-2.5 bg-white/[0.03] border border-white/[0.05] rounded-xl text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
           />
         </div>
 
@@ -106,7 +106,7 @@ export function ProductFilters({ categories }: { categories: Category[] }) {
         {hasActiveFilters && (
           <button
             onClick={clearFilters}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white rounded-xl transition-all border border-white/5"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-xl transition-all border border-white/[0.05]"
           >
             <X className="h-4 w-4" />
             <span className="md:hidden lg:inline text-xs font-medium">Limpiar</span>
@@ -116,15 +116,15 @@ export function ProductFilters({ categories }: { categories: Category[] }) {
 
       {/* Filter Chips / Active status display */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-        <div className="flex items-center gap-2 text-[10px] uppercase font-bold tracking-wider text-zinc-600">
+        <div className="flex items-center gap-2 text-[10px] uppercase font-bold tracking-wider text-slate-600">
           <SlidersHorizontal className="h-3 w-3" />
           Filtros activos:
         </div>
         {!hasActiveFilters && (
-          <span className="text-[10px] text-zinc-500 italic">Ninguno</span>
+          <span className="text-[10px] text-slate-500 italic">Ninguno</span>
         )}
         {search && (
-          <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-bold">
+          <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold">
             Búsqueda: {search}
           </span>
         )}

@@ -27,24 +27,19 @@ export default function DashboardLayout({
       return;
     }
 
-    const { data: userTenant } = await supabase
+    // JOIN en una sola consulta en vez de dos secuenciales
+    const { data } = await supabase
       .from("user_tenants")
-      .select("tenant_id")
+      .select("tenant_id, tenants(plan)")
       .eq("user_id", user.id)
       .single();
 
-    if (!userTenant?.tenant_id) {
+    if (!data?.tenant_id) {
       setPlan("esencial");
       return;
     }
 
-    const { data: tenant } = await supabase
-      .from("tenants")
-      .select("plan")
-      .eq("id", userTenant.tenant_id)
-      .single();
-
-    const planRaw = (tenant?.plan || "").toLowerCase().trim();
+    const planRaw = ((data.tenants as any)?.plan || "").toLowerCase().trim();
     if (planRaw.includes("empresa")) {
       setPlan("empresa");
     } else if (planRaw.includes("emprendimiento")) {
@@ -54,7 +49,8 @@ export default function DashboardLayout({
     }
   }, [supabase]);
 
-  // Detectar plan al montar y cuando cambia el auth
+  // onAuthStateChange dispara inmediatamente con la sesión actual (INITIAL_SESSION),
+  // cubriendo el montaje inicial y los cambios de auth sin necesidad de effects adicionales.
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
       detectPlan();
@@ -62,26 +58,21 @@ export default function DashboardLayout({
     return () => subscription.unsubscribe();
   }, [supabase, detectPlan]);
 
-  // Re-detectar plan cuando cambia la ruta (ej: login → dashboard)
-  useEffect(() => {
-    detectPlan();
-  }, [pathname, detectPlan]);
-
   // En login: renderizar children directamente (sin layout de plan)
   // En otras rutas sin plan aún: mostrar loader premium
   if (!plan) {
     if (pathname === "/admin/login") return <>{children}</>;
     return (
-      <div className="flex items-center justify-center h-svh w-full bg-[#030303] relative overflow-hidden">
+      <div className="flex items-center justify-center h-svh w-full bg-transparent relative overflow-hidden">
         {/* Ambient background glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-white/5 rounded-full blur-[120px] pointer-events-none animate-pulse"></div>
-        
+
         <div className="flex flex-col items-center gap-8 relative z-10">
           <div className="relative h-20 w-20">
             {/* Pulsing ring around the logo */}
-            <div className="absolute -inset-4 rounded-full border border-white/10 animate-[ping_3s_linear_infinite]"></div>
-            <div className="absolute -inset-2 rounded-full border border-white/5 animate-[ping_2s_linear_infinite]"></div>
-            
+            <div className="absolute -inset-4 rounded-full border border-white/[0.07] animate-[ping_3s_linear_infinite]"></div>
+            <div className="absolute -inset-2 rounded-full border border-white/[0.05] animate-[ping_2s_linear_infinite]"></div>
+
             <div className="relative h-full w-full transition-all duration-700">
               <Image
                 src="/logo-sitiohoy.png"

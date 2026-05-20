@@ -1,9 +1,10 @@
 "use client";
 
 import { login } from "@/actions/auth";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { SubmitButton } from "@/components/empresa/SubmitButton";
 import Image from "next/image";
+import { Eye, EyeOff } from "lucide-react";
 
 const initialState = {
   error: "",
@@ -15,11 +16,15 @@ async function loginAction(prevState: { error: string }, formData: FormData) {
   if (result?.error) {
     return { error: result.error };
   }
+  // Forzar recarga completa para que los componentes del layout
+  // detecten la nueva sesión desde cero (evita datos de sesión anterior)
+  window.location.href = "/admin";
   return prevState;
 }
 
 export default function LoginPage() {
   const [state, formAction] = useActionState(loginAction, initialState);
+  const [showPassword, setShowPassword] = useState(false);
 
   return (
     <div className="min-h-screen w-full flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative z-10">
@@ -42,7 +47,7 @@ export default function LoginPage() {
         <h2 className="mt-2 text-center text-3xl font-bold tracking-tight text-white drop-shadow-md">
           Panel de Control
         </h2>
-        <p className="mt-2 text-center text-sm text-zinc-400 text-balance px-4 italic">
+        <p className="mt-2 text-center text-sm text-slate-400 text-balance px-4 italic">
           Gestioná tu negocio con la tecnología de alto rendimiento de SitioHoy y llevá tu marca al siguiente nivel.
         </p>
       </div>
@@ -60,7 +65,7 @@ export default function LoginPage() {
             )}
 
             <div className="space-y-2">
-              <label htmlFor="email" className="block text-sm font-medium text-zinc-300">
+              <label htmlFor="email" className="block text-sm font-medium text-slate-300">
                 Correo Electrónico
               </label>
               <div className="mt-1">
@@ -78,25 +83,37 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="password" className="block text-sm font-medium text-zinc-300">
+              <label htmlFor="password" className="block text-sm font-medium text-slate-300">
                 Contraseña
               </label>
-              <div className="mt-1">
+              <div className="mt-1 relative flex items-center">
                 <input
                   id="password"
                   name="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   required
                   placeholder="••••••••"
-                  className="glass-input px-4 py-3 tracking-widest"
+                  className="glass-input pl-4 pr-12 py-3 tracking-widest"
                   suppressHydrationWarning
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 text-slate-400 hover:text-white transition-colors focus:outline-none"
+                  aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
               </div>
             </div>
 
             <div className="pt-4">
-              <SubmitButton className="w-full bg-white text-black hover:bg-zinc-200 transition-colors py-3 shadow-[0_0_20px_rgba(255,255,255,0.1)] rounded-xl font-semibold">
+              <SubmitButton className="w-full bg-white text-black hover:bg-slate-200 transition-colors py-3 shadow-[0_0_20px_rgba(255,255,255,0.1)] rounded-xl font-semibold">
                 Iniciar Sesión
               </SubmitButton>
             </div>

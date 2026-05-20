@@ -2,8 +2,9 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { getCurrentTenant } from "@/utils/auth";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { revalidateStorefront } from "@/utils/revalidate-storefront";
+import { TAGS } from "@/utils/cached-queries";
 
 export type ActionState = {
   success: boolean;
@@ -110,6 +111,7 @@ export async function saveShippingZone(prevState: ActionState, formData: FormDat
       return { success: false, error: "Error al guardar la zona de envío." };
     }
 
+    revalidateTag(TAGS.zonasEnvio(tenantId), 'max');
     revalidatePath("/admin/configuracion");
     await revalidateStorefront(tenantId, "shipping_zones");
     return { success: true, message: "Zona de envío creada exitosamente." };

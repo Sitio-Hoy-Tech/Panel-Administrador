@@ -28,7 +28,7 @@ export default async function ProductosPage({
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Catálogo</h1>
-          <p className="mt-2 text-zinc-400">Gestioná tus productos y servicios ({totalProductosCount} / {maxProducts} disponibles).</p>
+          <p className="mt-2 text-slate-400">Gestioná tus productos y servicios ({totalProductosCount} / {maxProducts} disponibles).</p>
         </div>
         <Link
           href="/admin/productos/crear"
@@ -47,17 +47,17 @@ export default async function ProductosPage({
         <div className="glass-panel p-16 text-center flex flex-col items-center justify-center relative overflow-hidden">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-primary/5 rounded-full blur-3xl"></div>
 
-          <div className="h-20 w-20 bg-surface border border-white/5 rounded-2xl flex items-center justify-center mb-6 shadow-lg relative z-10">
-            <ImageIcon className="h-8 w-8 text-zinc-500" />
+          <div className="h-20 w-20 bg-surface border border-white/[0.05] rounded-2xl flex items-center justify-center mb-6 shadow-lg relative z-10">
+            <ImageIcon className="h-8 w-8 text-slate-500" />
           </div>
           <h3 className="text-2xl font-bold text-foreground mb-2 relative z-10 tracking-tight">Tu catálogo está vacío</h3>
-          <p className="text-zinc-400 max-w-md relative z-10 text-balance">
+          <p className="text-slate-400 max-w-md relative z-10 text-balance">
             Creá tu primer producto. Podés añadir fotos, nombre, descripción, precio y stock. Tus clientes podrán comprarlo directamente con MercadoPago.
           </p>
           <div className="mt-8 relative z-10">
             <Link
               href="/admin/productos/crear"
-              className="inline-flex items-center gap-2 bg-white text-black px-6 py-3 rounded-lg font-medium hover:bg-zinc-200 transition-colors shadow-lg shadow-white/10"
+              className="inline-flex items-center gap-2 bg-white text-black px-6 py-3 rounded-lg font-medium hover:bg-slate-200 transition-colors shadow-lg shadow-white/10"
             >
               <Plus className="h-5 w-5" />
               Crear el primero
@@ -72,15 +72,15 @@ export default async function ProductosPage({
 
       {/* Floating Pagination */}
       {totalPages > 1 && (
-        <div className="sticky bottom-10 left-0 right-0 bg-[#111111]/90 backdrop-blur-xl border border-white/10 px-6 py-3 z-30 mt-8 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.7)]">
+        <div className="sticky bottom-10 left-0 right-0 bg-black/40/90 backdrop-blur-xl border border-white/[0.07] px-6 py-3 z-30 mt-8 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.7)]">
           <div className="flex items-center justify-between w-full">
-            <div className="text-xs text-zinc-500 hidden sm:block">
-              Página <span className="text-zinc-300 font-medium">{currentPage}</span> de <span className="text-zinc-300 font-medium">{totalPages}</span>
+            <div className="text-xs text-slate-500 hidden sm:block">
+              Página <span className="text-slate-300 font-medium">{currentPage}</span> de <span className="text-slate-300 font-medium">{totalPages}</span>
             </div>
             <div className="flex items-center gap-2 mx-auto sm:mr-0">
               <Link
                 href={currentPage > 1 ? `?page=${currentPage - 1}` : "#"}
-                className={`p-2 rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/5 transition-colors ${currentPage === 1 ? 'opacity-30 cursor-not-allowed pointer-events-none' : 'text-zinc-300'}`}
+                className={`p-2 rounded-xl border border-white/[0.05] bg-white/[0.02] hover:bg-white/5 transition-colors ${currentPage === 1 ? 'opacity-30 cursor-not-allowed pointer-events-none' : 'text-slate-300'}`}
                 aria-label="Página anterior"
               >
                 <ChevronLeft className="h-5 w-5" />
@@ -95,7 +95,7 @@ export default async function ProductosPage({
                       href={`?page=${pageNum}`}
                       className={`w-9 h-9 flex items-center justify-center rounded-xl border transition-all duration-300 text-sm font-medium ${isCurrent
                         ? 'bg-white text-black border-white shadow-lg shadow-white/10'
-                        : 'border-white/5 bg-white/[0.02] text-zinc-500 hover:text-zinc-300 hover:border-white/10'
+                        : 'border-white/[0.05] bg-white/[0.02] text-slate-500 hover:text-slate-300 hover:border-white/10'
                         }`}
                     >
                       {pageNum}
@@ -105,7 +105,7 @@ export default async function ProductosPage({
               </div>
               <Link
                 href={currentPage < totalPages ? `?page=${currentPage + 1}` : "#"}
-                className={`p-2 rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/5 transition-colors ${currentPage === totalPages ? 'opacity-30 cursor-not-allowed pointer-events-none' : 'text-zinc-300'}`}
+                className={`p-2 rounded-xl border border-white/[0.05] bg-white/[0.02] hover:bg-white/5 transition-colors ${currentPage === totalPages ? 'opacity-30 cursor-not-allowed pointer-events-none' : 'text-slate-300'}`}
                 aria-label="Página siguiente"
               >
                 <ChevronRight className="h-5 w-5" />

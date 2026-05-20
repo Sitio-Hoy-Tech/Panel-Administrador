@@ -2,21 +2,16 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { getCurrentTenant } from "@/utils/auth";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { revalidateStorefront } from "@/utils/revalidate-storefront";
+import { getCategoriasCached, TAGS } from "@/utils/cached-queries";
 
 export async function getCategorias() {
   const tenantId = await getCurrentTenant();
   if (!tenantId) return { error: "No autorizado" };
 
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from('categories')
-    .select('*')
-    .eq('tenant_id', tenantId)
-    .order('position', { ascending: true });
-
-  if (error) return { error: "Error al cargar categorías." };
+  const data = await getCategoriasCached(tenantId);
+  if (!data) return { error: "Error al cargar categorías." };
   return { success: true, data };
 }
 
@@ -41,6 +36,8 @@ export async function crearCategoria(formData: FormData) {
 
   if (error) return { error: "Error al crear la categoría." };
 
+  revalidateTag(TAGS.categorias(tenantId), 'max');
+  revalidateTag(TAGS.productos(tenantId), 'max');
   revalidatePath("/admin/categorias");
   revalidatePath("/admin/productos");
   await revalidateStorefront(tenantId, "categories");
@@ -65,6 +62,8 @@ export async function actualizarCategoria(id: string, formData: FormData) {
 
   if (error) return { error: "Error al actualizar la categoría." };
 
+  revalidateTag(TAGS.categorias(tenantId), 'max');
+  revalidateTag(TAGS.productos(tenantId), 'max');
   revalidatePath("/admin/categorias");
   revalidatePath("/admin/productos");
   await revalidateStorefront(tenantId, "categories");
@@ -87,6 +86,8 @@ export async function eliminarCategoria(id: string) {
 
   if (error) return { error: "Error al eliminar la categoría." };
 
+  revalidateTag(TAGS.categorias(tenantId), 'max');
+  revalidateTag(TAGS.productos(tenantId), 'max');
   revalidatePath("/admin/categorias");
   revalidatePath("/admin/productos");
   await revalidateStorefront(tenantId, "categories");

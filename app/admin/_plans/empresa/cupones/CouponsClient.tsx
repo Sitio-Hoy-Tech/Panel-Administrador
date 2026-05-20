@@ -74,13 +74,13 @@ export function CouponsClient({ initialCoupons }: CouponsClientProps) {
             <Ticket className="h-6 w-6 text-primary" />
             Cupones de Descuento
           </h1>
-          <p className="text-zinc-400">
+          <p className="text-slate-400">
             Creá y gestioná códigos promocionales para tus clientes.
           </p>
         </div>
         <button 
           onClick={openCreate}
-          className="flex items-center justify-center gap-2 px-5 py-2.5 bg-white text-black font-semibold rounded-xl hover:bg-zinc-200 hover:scale-105 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+          className="flex items-center justify-center gap-2 px-5 py-2.5 bg-white text-black font-semibold rounded-xl hover:bg-slate-200 hover:scale-105 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
         >
           <Plus className="h-5 w-5" />
           Nuevo Cupón
@@ -88,9 +88,9 @@ export function CouponsClient({ initialCoupons }: CouponsClientProps) {
       </div>
 
       <div className="glass-panel overflow-hidden">
-        <div className="p-4 border-b border-white/5 bg-white/[0.02] flex items-center gap-4">
+        <div className="p-4 border-b border-white/[0.05] bg-white/[0.02] flex items-center gap-4">
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
             <input
               type="text"
               placeholder="Buscar código..."
@@ -104,14 +104,14 @@ export function CouponsClient({ initialCoupons }: CouponsClientProps) {
 
         <div className="overflow-x-auto w-full">
           <table className="w-full text-left text-sm whitespace-nowrap min-w-[800px]">
-            <thead className="bg-white/[0.02] border-b border-white/5">
+            <thead className="bg-white/[0.02] border-b border-white/[0.05]">
               <tr>
-                <th className="px-6 py-4 font-medium text-zinc-400">Código</th>
-                <th className="px-6 py-4 font-medium text-zinc-400">Descuento</th>
-                <th className="px-6 py-4 font-medium text-zinc-400 text-center">Uso</th>
-                <th className="px-6 py-4 font-medium text-zinc-400">Vencimiento</th>
-                <th className="px-6 py-4 font-medium text-zinc-400 text-center">Estado</th>
-                <th className="px-6 py-4 font-medium text-zinc-400 text-right">Acciones</th>
+                <th className="px-6 py-4 font-medium text-slate-400">Código</th>
+                <th className="px-6 py-4 font-medium text-slate-400">Descuento</th>
+                <th className="px-6 py-4 font-medium text-slate-400 text-center">Uso</th>
+                <th className="px-6 py-4 font-medium text-slate-400">Vencimiento</th>
+                <th className="px-6 py-4 font-medium text-slate-400 text-center">Estado</th>
+                <th className="px-6 py-4 font-medium text-slate-400 text-right">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
@@ -119,7 +119,7 @@ export function CouponsClient({ initialCoupons }: CouponsClientProps) {
                 filteredCoupons.map((coupon) => (
                   <tr key={coupon.id} className="group hover:bg-white/[0.01] transition-colors">
                     <td className="px-6 py-4">
-                      <div className="inline-flex items-center px-3 py-1 rounded-md bg-white/5 border border-white/10 text-white font-mono font-bold tracking-wider">
+                      <div className="inline-flex items-center px-3 py-1 rounded-md bg-white/5 border border-white/[0.07] text-white font-mono font-bold tracking-wider">
                         {coupon.code}
                       </div>
                     </td>
@@ -129,19 +129,19 @@ export function CouponsClient({ initialCoupons }: CouponsClientProps) {
                         {coupon.type === 'fixed' && `$${new Intl.NumberFormat('es-AR').format(coupon.value)} OFF`}
                       </span>
                       {coupon.min_amount && coupon.min_amount > 0 && (
-                        <p className="text-[10px] text-zinc-500 mt-1">Min. ${new Intl.NumberFormat('es-AR').format(coupon.min_amount)}</p>
+                        <p className="text-[10px] text-slate-500 mt-1">Min. ${new Intl.NumberFormat('es-AR').format(coupon.min_amount)}</p>
                       )}
                     </td>
                     <td className="px-6 py-4 text-center">
                       <div className="flex flex-col items-center">
                         <span className="text-white font-medium">{coupon.uses_count}</span>
                         {coupon.max_uses && (
-                          <span className="text-[10px] text-zinc-500">de {coupon.max_uses}</span>
+                          <span className="text-[10px] text-slate-500">de {coupon.max_uses}</span>
                         )}
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-sm text-zinc-400">
+                      <span className="text-sm text-slate-400">
                         {coupon.expires_at ? format(new Date(coupon.expires_at), "dd MMM yyyy", { locale: es }) : 'Sin caducidad'}
                       </span>
                     </td>
@@ -151,7 +151,7 @@ export function CouponsClient({ initialCoupons }: CouponsClientProps) {
                         className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider transition-colors ${
                           coupon.active 
                             ? 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20' 
-                            : 'bg-zinc-500/10 text-zinc-500 hover:bg-zinc-500/20'
+                            : 'bg-slate-500/10 text-slate-500 hover:bg-slate-500/20'
                         }`}
                       >
                         {coupon.active ? 'Activo' : 'Inactivo'}
@@ -161,13 +161,13 @@ export function CouponsClient({ initialCoupons }: CouponsClientProps) {
                       <div className="flex items-center justify-end gap-2">
                         <button 
                           onClick={() => openEdit(coupon)}
-                          className="p-2 text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+                          className="p-2 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
                         >
                           <Edit2 className="h-4 w-4" />
                         </button>
                         <button 
                           onClick={() => handleDelete(coupon.id)}
-                          className="p-2 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                          className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                         >
                           <Trash className="h-4 w-4" />
                         </button>
@@ -177,7 +177,7 @@ export function CouponsClient({ initialCoupons }: CouponsClientProps) {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-zinc-500">
+                  <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
                     No se encontraron cupones.
                   </td>
                 </tr>

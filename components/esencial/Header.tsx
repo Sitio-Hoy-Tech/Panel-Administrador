@@ -7,7 +7,7 @@ export function Header() {
         {/* Placeholder for future search or breadcrumbs */}
       </div>
       <div className="flex items-center gap-4">
-        <button className="relative text-zinc-400 hover:text-foreground transition-colors">
+        <button className="relative text-slate-400 hover:text-foreground transition-colors">
           <Bell className="h-5 w-5" />
           <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-primary ring-2 ring-surface" />
         </button>

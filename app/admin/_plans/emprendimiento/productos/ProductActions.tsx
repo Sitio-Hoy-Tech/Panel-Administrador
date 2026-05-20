@@ -42,7 +42,7 @@ export function ProductActions({ product }: ProductActionsProps) {
           onClick={handleToggleActive}
           disabled={isPending}
           title={product.active ? "Pausar" : "Reanudar"}
-          className="p-2 hover:bg-white/5 rounded-lg transition-colors text-zinc-400 hover:text-white disabled:opacity-50"
+          className="p-2 hover:bg-white/5 rounded-lg transition-colors text-slate-400 hover:text-white disabled:opacity-50"
         >
           {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : (product.active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />)}
         </button>
@@ -51,7 +51,7 @@ export function ProductActions({ product }: ProductActionsProps) {
         <Link
           href={`/admin/productos/editar/${product.id}`}
           title="Editar producto"
-          className="p-2 hover:bg-white/5 rounded-lg transition-colors text-zinc-400 hover:text-white disabled:opacity-50"
+          className="p-2 hover:bg-white/5 rounded-lg transition-colors text-slate-400 hover:text-white disabled:opacity-50"
         >
           <Pencil className="h-4 w-4" />
         </Link>
@@ -61,7 +61,7 @@ export function ProductActions({ product }: ProductActionsProps) {
           onClick={handleDeleteClick}
           disabled={isPending}
           title="Eliminar"
-          className="p-2 hover:bg-red-500/10 rounded-lg transition-colors text-zinc-400 hover:text-red-400 disabled:opacity-50"
+          className="p-2 hover:bg-red-500/10 rounded-lg transition-colors text-slate-400 hover:text-red-400 disabled:opacity-50"
         >
           {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
         </button>

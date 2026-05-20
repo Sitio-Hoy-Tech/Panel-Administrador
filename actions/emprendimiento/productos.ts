@@ -2,8 +2,9 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { getCurrentTenant } from "@/utils/auth";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { revalidateStorefront } from "@/utils/revalidate-storefront";
+import { getProductosCached, TAGS } from "@/utils/cached-queries";
 
 function generateSlug(name: string): string {
   return name
@@ -18,57 +19,11 @@ function generateSlug(name: string): string {
 
 export async function getProductos() {
   const tenantId = await getCurrentTenant();
+  if (!tenantId) return { error: "No autorizado" };
 
-  if (!tenantId) {
-    return { error: "No autorizado" };
-  }
-
-  const supabase = await createClient();
-
-  const { data: productos, error } = await supabase
-    .from('products')
-    .select(`
-      id,
-      name,
-      description,
-      price,
-      sale_price,
-      active,
-      is_sale,
-      category_id,
-      position,
-      product_images!fk_images_product ( url ),
-      product_variants!fk_variants_product ( stock )
-    `)
-    .eq('tenant_id', tenantId)
-    .order('position', { ascending: true });
-
-  if (error) {
-    console.error("Error obteniendo productos:", error);
-    return { error: "Error al cargar los productos." };
-  }
-
-  const formattedProducts = productos.map(p => {
-    const totalStock = p.product_variants && p.product_variants.length > 0
-      ? p.product_variants.reduce((acc: number, curr: any) => acc + (curr.stock || 0), 0)
-      : null;
-
-    return {
-      id: p.id,
-      name: p.name,
-      description: p.description,
-      price: p.price,
-      sale_price: p.sale_price,
-      active: p.active,
-      is_sale: p.is_sale || false,
-      category_id: p.category_id,
-      position: p.position,
-      stock: totalStock,
-      image: p.product_images && p.product_images.length > 0 ? p.product_images[0].url : null
-    };
-  });
-
-  return { success: true, data: formattedProducts };
+  const data = await getProductosCached(tenantId);
+  if (!data) return { error: "Error al cargar los productos." };
+  return { success: true, data };
 }
 
 export async function crearProducto(formData: FormData) {
@@ -185,6 +140,7 @@ export async function crearProducto(formData: FormData) {
     }
   }
 
+  revalidateTag(TAGS.productos(tenantId), 'max');
   revalidatePath("/admin/productos");
   revalidatePath("/admin");
   await revalidateStorefront(tenantId, "products");
@@ -223,6 +179,7 @@ export async function eliminarProducto(productId: string) {
 
   if (error) return { error: "Error al eliminar el producto." };
 
+  revalidateTag(TAGS.productos(tenantId), 'max');
   revalidatePath("/admin/productos");
   revalidatePath("/admin");
   await revalidateStorefront(tenantId, "products");
@@ -242,6 +199,7 @@ export async function toggleProductoActivo(productId: string, active: boolean) {
 
   if (error) return { error: "Error al actualizar estado." };
 
+  revalidateTag(TAGS.productos(tenantId), 'max');
   revalidatePath("/admin/productos");
   revalidatePath("/admin");
   await revalidateStorefront(tenantId, "products");
@@ -409,6 +367,7 @@ export async function actualizarProducto(productId: string, formData: FormData) 
     }
   }
 
+  revalidateTag(TAGS.productos(tenantId), 'max');
   revalidatePath("/admin/productos");
   revalidatePath("/admin");
   await revalidateStorefront(tenantId, "products");
@@ -424,13 +383,15 @@ export async function reordenarProductos(updates: { id: string; position: number
 
   const supabase = await createClient();
 
-  for (const update of updates) {
-    await supabase
-      .from('products')
-      .update({ position: update.position })
-      .eq('id', update.id)
-      .eq('tenant_id', tenantId);
-  }
+  await Promise.all(
+    updates.map(update =>
+      supabase
+        .from('products')
+        .update({ position: update.position })
+        .eq('id', update.id)
+        .eq('tenant_id', tenantId)
+    )
+  );
 
   revalidatePath("/admin/productos");
   await revalidateStorefront(tenantId, "products");

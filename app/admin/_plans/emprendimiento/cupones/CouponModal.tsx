@@ -81,12 +81,12 @@ export function CouponModal({ coupon, onClose, onSuccess }: CouponModalProps) {
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in" onClick={onClose} />
 
-      <div className="relative bg-surface border border-white/10 shadow-2xl rounded-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 fade-in duration-200 flex flex-col max-h-[90vh]">
-        <div className="p-6 border-b border-white/5 flex items-center justify-between">
+      <div className="relative bg-surface border border-white/[0.07] shadow-2xl rounded-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 fade-in duration-200 flex flex-col max-h-[90vh]">
+        <div className="p-6 border-b border-white/[0.05] flex items-center justify-between">
           <h2 className="text-xl font-bold text-white">
             {coupon ? "Editar Cupón" : "Nuevo Cupón"}
           </h2>
-          <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-lg transition-colors text-zinc-400 hover:text-white">
+          <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-lg transition-colors text-slate-400 hover:text-white">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -94,7 +94,7 @@ export function CouponModal({ coupon, onClose, onSuccess }: CouponModalProps) {
         <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-6">
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-1">
+              <label className="block text-sm font-medium text-slate-300 mb-1">
                 Código del Cupón
               </label>
               <input
@@ -106,11 +106,11 @@ export function CouponModal({ coupon, onClose, onSuccess }: CouponModalProps) {
                 required
                 suppressHydrationWarning
               />
-              <p className="text-xs text-zinc-500 mt-1">Los clientes ingresarán este código al pagar.</p>
+              <p className="text-xs text-slate-500 mt-1">Los clientes ingresarán este código al pagar.</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-2">
+              <label className="block text-sm font-medium text-slate-300 mb-2">
                 Tipo de Descuento
               </label>
               <div className="grid grid-cols-2 gap-2">
@@ -120,7 +120,7 @@ export function CouponModal({ coupon, onClose, onSuccess }: CouponModalProps) {
                   className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all ${
                     formData.type === 'percent' 
                       ? 'bg-primary/10 border-primary text-primary' 
-                      : 'bg-white/[0.02] border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
+                      : 'bg-white/[0.02] border-white/[0.05] text-slate-400 hover:bg-white/5 hover:text-white'
                   }`}
                 >
                   <Percent className="h-5 w-5" />
@@ -132,7 +132,7 @@ export function CouponModal({ coupon, onClose, onSuccess }: CouponModalProps) {
                   className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all ${
                     formData.type === 'fixed' 
                       ? 'bg-primary/10 border-primary text-primary' 
-                      : 'bg-white/[0.02] border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
+                      : 'bg-white/[0.02] border-white/[0.05] text-slate-400 hover:bg-white/5 hover:text-white'
                   }`}
                 >
                   <DollarSign className="h-5 w-5" />
@@ -142,15 +142,15 @@ export function CouponModal({ coupon, onClose, onSuccess }: CouponModalProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-1">
+              <label className="block text-sm font-medium text-slate-300 mb-1">
                 Valor del Descuento
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   {formData.type === 'percent' ? (
-                    <Percent className="h-4 w-4 text-zinc-500" />
+                    <Percent className="h-4 w-4 text-slate-500" />
                   ) : (
-                    <span className="text-zinc-500 font-medium pl-2">$</span>
+                    <span className="text-slate-500 font-medium pl-2">$</span>
                   )}
                 </div>
                 <input
@@ -165,12 +165,12 @@ export function CouponModal({ coupon, onClose, onSuccess }: CouponModalProps) {
               </div>
             </div>
 
-            <div className="pt-4 border-t border-white/5">
+            <div className="pt-4 border-t border-white/[0.05]">
               <h3 className="text-sm font-semibold text-white mb-4">Condiciones (Opcional)</h3>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-zinc-400 mb-1">
+                  <label className="block text-xs font-medium text-slate-400 mb-1">
                     Compra mínima ($)
                   </label>
                   <input
@@ -184,7 +184,7 @@ export function CouponModal({ coupon, onClose, onSuccess }: CouponModalProps) {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-zinc-400 mb-1">
+                  <label className="block text-xs font-medium text-slate-400 mb-1">
                     Límite de usos
                   </label>
                   <input
@@ -213,7 +213,7 @@ export function CouponModal({ coupon, onClose, onSuccess }: CouponModalProps) {
               <input
                 type="checkbox"
                 id="active"
-                className="rounded border-white/10 bg-white/5 text-primary focus:ring-primary focus:ring-offset-0"
+                className="rounded border-white/[0.07] bg-white/5 text-primary focus:ring-primary focus:ring-offset-0"
                 checked={formData.active}
                 onChange={e => setFormData({ ...formData, active: e.target.checked })}
               />
@@ -224,7 +224,7 @@ export function CouponModal({ coupon, onClose, onSuccess }: CouponModalProps) {
           </div>
         </form>
 
-        <div className="p-6 border-t border-white/5 bg-white/[0.02] flex justify-end gap-3">
+        <div className="p-6 border-t border-white/[0.05] bg-white/[0.02] flex justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
@@ -235,7 +235,7 @@ export function CouponModal({ coupon, onClose, onSuccess }: CouponModalProps) {
           <button
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="px-6 py-2 bg-white text-black text-sm font-bold rounded-xl hover:bg-zinc-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2 bg-white text-black text-sm font-bold rounded-xl hover:bg-slate-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? "Guardando..." : "Guardar Cupón"}
           </button>

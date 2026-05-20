@@ -16,12 +16,12 @@ export function TopProductsList({ products }: TopProductsListProps) {
         {products.map((product, index) => (
           <div key={product.name} className="flex items-center justify-between group">
             <div className="flex items-center gap-4">
-              <div className="h-8 w-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-xs font-bold text-zinc-500 group-hover:text-white group-hover:bg-primary/20 transition-all">
+              <div className="h-8 w-8 rounded-lg bg-white/5 border border-white/[0.07] flex items-center justify-center text-xs font-bold text-slate-500 group-hover:text-white group-hover:bg-primary/20 transition-all">
                 {index + 1}
               </div>
               <div>
-                <p className="text-sm font-medium text-zinc-200 group-hover:text-white transition-colors">{product.name}</p>
-                <p className="text-[10px] text-zinc-500 uppercase tracking-widest">{product.quantity} unidades vendidas</p>
+                <p className="text-sm font-medium text-slate-200 group-hover:text-white transition-colors">{product.name}</p>
+                <p className="text-[10px] text-slate-500 uppercase tracking-widest">{product.quantity} unidades vendidas</p>
               </div>
             </div>
             <div className="text-right">
@@ -31,7 +31,7 @@ export function TopProductsList({ products }: TopProductsListProps) {
           </div>
         ))}
         {products.length === 0 && (
-          <p className="text-center text-zinc-500 text-sm py-8 italic">No hay suficientes datos de ventas aún.</p>
+          <p className="text-center text-slate-500 text-sm py-8 italic">No hay suficientes datos de ventas aún.</p>
         )}
       </div>
     </div>

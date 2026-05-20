@@ -63,7 +63,7 @@ export function CustomNumberInput({
   return (
     <div className={`relative group ${className}`}>
       {prefix && (
-        <span className="absolute left-4 top-3.5 text-zinc-500 font-medium z-10">
+        <span className="absolute left-4 top-3.5 text-slate-500 font-medium z-10">
           {prefix}
         </span>
       )}
@@ -87,7 +87,7 @@ export function CustomNumberInput({
           type="button"
           onClick={handleDecrement}
           disabled={disabled}
-          className="h-8 w-8 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 text-zinc-400 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all active:scale-90 disabled:opacity-30"
+          className="h-8 w-8 flex items-center justify-center rounded-lg bg-white/5 border border-white/[0.07] text-slate-400 hover:text-white hover:bg-white/10 hover:border-white/[0.07] transition-all active:scale-90 disabled:opacity-30"
         >
           <Minus className="h-4 w-4" />
         </button>
@@ -95,7 +95,7 @@ export function CustomNumberInput({
           type="button"
           onClick={handleIncrement}
           disabled={disabled}
-          className="h-8 w-8 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 text-zinc-400 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all active:scale-90 disabled:opacity-30"
+          className="h-8 w-8 flex items-center justify-center rounded-lg bg-white/5 border border-white/[0.07] text-slate-400 hover:text-white hover:bg-white/10 hover:border-white/[0.07] transition-all active:scale-90 disabled:opacity-30"
         >
           <Plus className="h-4 w-4" />
         </button>

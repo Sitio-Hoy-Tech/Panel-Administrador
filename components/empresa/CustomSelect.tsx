@@ -37,30 +37,30 @@ export function CustomSelect({ options, value, onChange, placeholder = "Seleccio
 
   return (
     <div className="relative w-full" ref={containerRef}>
-      {label && <label className="block text-xs font-bold uppercase tracking-wider text-zinc-500 mb-1.5 ml-1">{label}</label>}
+      {label && <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 ml-1">{label}</label>}
       
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={`
           flex items-center justify-between w-full px-4 py-2.5 
-          bg-white/[0.03] border border-white/5 rounded-xl text-sm text-white 
-          hover:bg-white/5 hover:border-white/10 transition-all duration-200
-          focus:outline-none focus:ring-1 focus:ring-blue-500/50
-          ${isOpen ? "ring-1 ring-blue-500/50 border-blue-500/50 shadow-[0_0_20px_rgba(59,130,246,0.1)]" : ""}
+          bg-white/[0.03] border border-white/[0.05] rounded-xl text-sm text-white 
+          hover:bg-white/5 hover:border-white/[0.07] transition-all duration-200
+          focus:outline-none focus:ring-1 focus:ring-emerald-500/50
+          ${isOpen ? "ring-1 ring-emerald-500/50 border-emerald-500/50 shadow-[0_0_20px_rgba(59,130,246,0.1)]" : ""}
         `}
       >
         <span className="flex items-center gap-2 truncate text-left">
-          {selectedOption?.icon && <selectedOption.icon className="h-4 w-4 text-zinc-500" />}
-          <span className={!selectedOption ? "text-zinc-500" : "text-white"}>
+          {selectedOption?.icon && <selectedOption.icon className="h-4 w-4 text-slate-500" />}
+          <span className={!selectedOption ? "text-slate-500" : "text-white"}>
             {selectedOption ? (selectedOption.name || selectedOption.label) : placeholder}
           </span>
         </span>
-        <ChevronDown className={`h-4 w-4 text-zinc-500 transition-transform duration-300 ${isOpen ? "rotate-180 text-blue-400" : ""}`} />
+        <ChevronDown className={`h-4 w-4 text-slate-500 transition-transform duration-300 ${isOpen ? "rotate-180 text-emerald-400" : ""}`} />
       </button>
 
       {isOpen && (
-        <div className="absolute z-[100] w-full mt-2 py-1.5 bg-[#111111] border border-white/10 rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] backdrop-blur-xl animate-in fade-in zoom-in duration-200 origin-top">
+        <div className="absolute z-[100] w-full mt-2 py-1.5 bg-black/40 border border-white/[0.07] rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] backdrop-blur-xl animate-in fade-in zoom-in duration-200 origin-top">
           <div className="max-h-60 overflow-y-auto custom-scrollbar">
             {options.map((option, idx) => {
               const optId = option.id || option.value || `opt-${idx}`;
@@ -78,12 +78,12 @@ export function CustomSelect({ options, value, onChange, placeholder = "Seleccio
                   className={`
                     flex items-center justify-between w-full px-4 py-2.5 text-sm transition-colors
                     ${isSelected 
-                      ? "bg-blue-500/10 text-blue-400 font-medium" 
-                      : "text-zinc-400 hover:bg-white/5 hover:text-white"}
+                      ? "bg-emerald-500/10 text-emerald-400 font-medium" 
+                      : "text-slate-400 hover:bg-white/5 hover:text-white"}
                   `}
                 >
                   <div className="flex items-center gap-2">
-                    {option.icon && <option.icon className={`h-4 w-4 ${isSelected ? "text-blue-400" : "text-zinc-500"}`} />}
+                    {option.icon && <option.icon className={`h-4 w-4 ${isSelected ? "text-emerald-400" : "text-slate-500"}`} />}
                     <span>{optName}</span>
                   </div>
                   {isSelected && <Check className="h-3.5 w-3.5" />}

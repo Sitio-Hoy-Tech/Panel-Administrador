@@ -14,7 +14,7 @@ export default async function ClientesPage() {
             <Users className="h-6 w-6 text-primary" />
             CRM de Clientes
           </h1>
-          <p className="text-zinc-400">
+          <p className="text-slate-400">
             Gestioná y analizá el comportamiento de compra de tus clientes.
           </p>
         </div>

@@ -1,7 +1,8 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { redirect } from "next/navigation";
+import { setTenantCookie, clearTenantCookie } from "@/utils/auth";
+import { revalidatePath } from "next/cache";
 
 export async function login(formData: FormData) {
   const email = formData.get("email") as string;
@@ -23,23 +24,26 @@ export async function login(formData: FormData) {
   if (user) {
     const { data: userTenant } = await supabase
       .from('user_tenants')
-      .select('id')
+      .select('tenant_id')
       .eq('user_id', user.id)
       .single();
 
     if (!userTenant) {
-      // Cerrar la sesión si no tiene permisos
       await supabase.auth.signOut();
       return { error: "Tu cuenta no tiene un panel asignado." };
     }
+
+    await setTenantCookie(userTenant.tenant_id);
   }
 
-  // Redirigir al dashboard si todo sale bien
-  redirect("/admin");
+  revalidatePath('/admin', 'layout');
+  return { success: true };
 }
 
 export async function logout() {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  redirect("/admin/login");
+  await clearTenantCookie();
+  revalidatePath('/admin', 'layout');
+  return { success: true };
 }

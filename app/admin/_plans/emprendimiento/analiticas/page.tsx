@@ -8,7 +8,7 @@ export default function AnaliticasPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Analítica Avanzada</h1>
-          <p className="mt-2 text-zinc-400">Rendimiento y tráfico de tu tienda impulsado por Umami.</p>
+          <p className="mt-2 text-slate-400">Rendimiento y tráfico de tu tienda impulsado por Umami.</p>
         </div>
       </div>
 
@@ -29,17 +29,17 @@ export default function AnaliticasPage() {
               <Lock className="h-10 w-10 text-amber-400 -rotate-3" />
             </div>
             <h3 className="text-2xl font-bold text-white mb-3">Analíticas en Preparación</h3>
-            <p className="text-zinc-400 max-w-md mb-10 leading-relaxed">
+            <p className="text-slate-400 max-w-md mb-10 leading-relaxed">
               Cuando el servicio de analíticas esté vinculado a tu tienda, podrás visualizar aquí el tráfico detallado y comportamiento de tus usuarios.
             </p>
             
-            <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-white/5 border border-white/10 text-zinc-500 text-xs font-medium uppercase tracking-[0.2em]">
+            <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-white/5 border border-white/[0.07] text-slate-500 text-xs font-medium uppercase tracking-[0.2em]">
                 <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse"></span>
                 Esperando conexión
             </div>
 
             <div className="mt-16 flex items-center gap-8 opacity-20 grayscale transition-all duration-500">
-                <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-500">Powered by</span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500">Powered by</span>
                 <div className="flex items-center gap-2">
                     <div className="h-4 w-4 bg-white rounded-full"></div>
                     <span className="text-sm font-bold text-white tracking-tighter">umami</span>
@@ -49,7 +49,7 @@ export default function AnaliticasPage() {
         )}
       </div>
 
-      <div className="flex justify-between items-center text-[10px] text-zinc-600 uppercase tracking-widest px-2">
+      <div className="flex justify-between items-center text-[10px] text-slate-600 uppercase tracking-widest px-2">
         <span>Privacidad Garantizada</span>
         <span>Sin Cookies • GDPR Compliant</span>
       </div>

@@ -12,7 +12,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h3 className="text-xl font-bold text-white tracking-tight">Tendencia de Ventas</h3>
-          <p className="text-zinc-500 text-xs mt-1 uppercase tracking-widest">Ingresos por día (Últimos días activos)</p>
+          <p className="text-slate-500 text-xs mt-1 uppercase tracking-widest">Ingresos por día (Últimos días activos)</p>
         </div>
       </div>
       

@@ -37,7 +37,7 @@ export function OrderRow({ order, onViewDetails }: OrderRowProps) {
           <span className="font-bold text-white text-sm">
             #{order.id.slice(0, 8).toUpperCase()}
           </span>
-          <span className="text-xs text-zinc-400">
+          <span className="text-xs text-slate-400">
             {order.customer_first_name} {order.customer_last_name}
           </span>
         </div>
@@ -54,7 +54,7 @@ export function OrderRow({ order, onViewDetails }: OrderRowProps) {
               MP OK
             </div>
           ) : (
-            <div className="px-2 py-0.5 rounded bg-zinc-500/10 text-zinc-500 text-[10px] font-bold uppercase tracking-wider">
+            <div className="px-2 py-0.5 rounded bg-slate-500/10 text-slate-500 text-[10px] font-bold uppercase tracking-wider">
               PEND
             </div>
           )}
@@ -68,14 +68,14 @@ export function OrderRow({ order, onViewDetails }: OrderRowProps) {
         />
       </td>
       <td className="px-6 py-4">
-        <span className="text-xs text-zinc-500">
+        <span className="text-xs text-slate-500">
           {format(new Date(order.created_at), "dd MMM, HH:mm", { locale: es })}
         </span>
       </td>
       <td className="px-6 py-4 text-right">
         <button 
           onClick={onViewDetails}
-          className="p-2 text-zinc-500 hover:text-white hover:bg-white/5 rounded-lg transition-all group-hover:scale-110"
+          className="p-2 text-slate-500 hover:text-white hover:bg-white/5 rounded-lg transition-all group-hover:scale-110"
         >
           <Eye className="h-4 w-4" />
         </button>

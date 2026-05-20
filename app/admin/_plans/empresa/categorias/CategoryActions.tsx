@@ -54,7 +54,7 @@ export function CategoryActions({ category }: CategoryActionsProps) {
         onClick={handleToggle}
         disabled={isToggling}
         title={category.active ? "Desactivar" : "Activar"}
-        className="p-2 text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors disabled:opacity-50"
+        className="p-2 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors disabled:opacity-50"
       >
         {isToggling ? (
           <Loader2 className="h-4 w-4 animate-spin" />
@@ -68,7 +68,7 @@ export function CategoryActions({ category }: CategoryActionsProps) {
       <button
         onClick={() => setShowConfirm(true)}
         disabled={isDeleting}
-        className="p-2 text-zinc-500 hover:text-red-400 hover:bg-red-400/5 rounded-lg transition-colors disabled:opacity-50"
+        className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-400/5 rounded-lg transition-colors disabled:opacity-50"
       >
         {isDeleting ? (
           <Loader2 className="h-4 w-4 animate-spin" />
