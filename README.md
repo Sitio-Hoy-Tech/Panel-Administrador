@@ -42,6 +42,7 @@ Para que la detección funcione, la tabla `tenants` debe tener:
 | `SUPABASE_SERVICE_ROLE_KEY` | Clave service role (solo servidor, nunca expuesta al cliente) |
 | `STORE_URL` | URL del sitio público del cliente (para revalidar caché) |
 | `STORE_REVALIDATION_SECRET` | Secret compartido para invalidar caché del storefront |
+| `CRM_WEBHOOK_SECRET` | Secret para autenticar requests al webhook del CRM (`x-webhook-secret`) |
 
 3. En Vercel, cargar las mismas variables bajo los entornos correspondientes.
 
@@ -49,7 +50,7 @@ Para que la detección funcione, la tabla `tenants` debe tener:
 
 El flujo completo de recuperación de contraseña está implementado:
 
-1. **Solicitud desde el panel:** En la sección Configuración → Cambiar Contraseña, el usuario puede hacer click en "Solicitar cambio a SitioHoy". Esto inserta un registro en `contact_messages` con `source = 'password_reset_request'`, visible en el CRM.
+1. **Solicitud desde el panel:** En la sección Configuración → Cambiar Contraseña, el usuario puede hacer click en "Solicitar cambio a SitioHoy". Esto envía un ticket al CRM via webhook con `source = 'password_reset_request'`.
 
 2. **Envío del email de recuperación:** Desde el CRM/backend de SitioHoy se llama a:
    ```ts
@@ -64,7 +65,7 @@ La URL `https://admin.sitiohoy.com.ar/auth/reset-password` debe estar en la allo
 
 ## Soporte y CRM
 
-La sección Soporte de cada plan incluye un formulario de contacto directo con el equipo de SitioHoy. Las consultas se guardan en la tabla `contact_messages` usando el service role (bypasea RLS) con los siguientes valores de `source` para filtrar en el CRM:
+La sección Soporte de cada plan incluye un formulario de contacto directo con el equipo de SitioHoy. Las consultas se envían al CRM via webhook (`utils/crm.ts`) con los siguientes valores de `source`:
 
 | Tipo de consulta | `source` |
 |---|---|
@@ -74,7 +75,12 @@ La sección Soporte de cada plan incluye un formulario de contacto directo con e
 | Otra consulta | `support_other` |
 | Solicitud de cambio de contraseña | `password_reset_request` |
 
-Para ver todas las consultas de soporte: `SELECT * FROM contact_messages WHERE source LIKE 'support_%' ORDER BY created_at DESC`.
+### Regla de routing
+
+- `source = 'contact_form'` → inserta en la tabla `contact_messages` de Supabase (formulario del sitio público, no aplica a este panel).
+- Cualquier otro `source` → POST al webhook del CRM (`https://crm.sitiohoy.com.ar/api/webhooks/ticket`) autenticado con `x-webhook-secret`.
+
+Si el POST al CRM falla, el error se loguea en consola pero el flujo del usuario no se interrumpe (siempre ve éxito).
 
 ## Estructura del Proyecto
 
@@ -107,6 +113,7 @@ Para ver todas las consultas de soporte: `SELECT * FROM contact_messages WHERE s
 │   └── plan-config.ts          # Helper central de detección de plan
 └── utils/
     ├── auth.ts                 # Funciones core de obtención de Tenant y Plan
+    ├── crm.ts                  # sendTicketToCRM — envía tickets al webhook del CRM
     └── supabase/
         └── server.ts           # createClient (con sesión) y createAdminClient (service role)
 ```

@@ -1,6 +1,7 @@
 "use server";
 
-import { createClient, createAdminClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/server";
+import { sendTicketToCRM } from "@/utils/crm";
 import { login as empresaLogin, logout as empresaLogout } from "./empresa/auth";
 
 export async function login(formData: FormData) {
@@ -93,19 +94,13 @@ export async function requestPasswordReset(): Promise<ResetRequestState> {
     .eq("id", userTenant.tenant_id)
     .single();
 
-  const adminClient = createAdminClient();
-  const { error } = await adminClient.from("contact_messages").insert({
+  await sendTicketToCRM({
     tenant_id: userTenant.tenant_id,
     name: tenant?.name ?? user.email,
     email: user.email,
     message: `El usuario solicita un restablecimiento de contraseña para su panel de administración.`,
     source: "password_reset_request",
-    status: "new",
   });
-
-  if (error) {
-    return { success: false, error: "No se pudo enviar la solicitud. Intentá de nuevo." };
-  }
 
   return { success: true, message: "Solicitud enviada. El equipo de SitioHoy te contactará pronto." };
 }

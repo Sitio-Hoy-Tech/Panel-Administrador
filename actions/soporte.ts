@@ -1,6 +1,7 @@
 "use server";
 
-import { createClient, createAdminClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/server";
+import { sendTicketToCRM } from "@/utils/crm";
 
 export type SupportRequestState = {
   success: boolean;
@@ -53,19 +54,13 @@ export async function submitSupportRequest(
     .eq("id", userTenant.tenant_id)
     .single();
 
-  const adminClient = createAdminClient();
-  const { error } = await adminClient.from("contact_messages").insert({
+  await sendTicketToCRM({
     tenant_id: userTenant.tenant_id,
     name: tenant?.name ?? user.email,
     email: user.email,
     message,
     source: type,
-    status: "new",
   });
-
-  if (error) {
-    return { success: false, error: "No se pudo enviar la consulta. Intentá de nuevo." };
-  }
 
   return { success: true, message: "Consulta enviada. Te responderemos pronto." };
 }
