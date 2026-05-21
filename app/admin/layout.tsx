@@ -8,6 +8,7 @@ import Image from "next/image";
 import EsencialLayout from "./_plans/esencial/layout";
 import EmprendimientoLayout from "./_plans/emprendimiento/layout";
 import EmpresaLayout from "./_plans/empresa/layout";
+import SupportChat from "@/components/shared/SupportChat";
 
 type PlanType = "esencial" | "emprendimiento" | "empresa";
 
@@ -17,6 +18,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }>) {
   const [plan, setPlan] = useState<PlanType | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
   const pathname = usePathname();
   const supabase = createClient();
 
@@ -52,8 +54,9 @@ export default function DashboardLayout({
   // onAuthStateChange dispara inmediatamente con la sesión actual (INITIAL_SESSION),
   // cubriendo el montaje inicial y los cambios de auth sin necesidad de effects adicionales.
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       detectPlan();
+      setAccessToken(session?.access_token ?? null);
     });
     return () => subscription.unsubscribe();
   }, [supabase, detectPlan]);
@@ -99,12 +102,14 @@ export default function DashboardLayout({
     );
   }
 
+  const chat = accessToken ? <SupportChat accessToken={accessToken} /> : null;
+
   switch (plan) {
     case "esencial":
-      return <EsencialLayout>{children}</EsencialLayout>;
+      return <><EsencialLayout>{children}</EsencialLayout>{chat}</>;
     case "emprendimiento":
-      return <EmprendimientoLayout>{children}</EmprendimientoLayout>;
+      return <><EmprendimientoLayout>{children}</EmprendimientoLayout>{chat}</>;
     case "empresa":
-      return <EmpresaLayout>{children}</EmpresaLayout>;
+      return <><EmpresaLayout>{children}</EmpresaLayout>{chat}</>;
   }
 }
