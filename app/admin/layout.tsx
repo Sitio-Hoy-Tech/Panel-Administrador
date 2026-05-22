@@ -26,6 +26,7 @@ export default function DashboardLayout({
   const [subscriptionExpired, setSubscriptionExpired] = useState(false);
   const [subscriptionAtRisk, setSubscriptionAtRisk] = useState(false);
   const [graceDaysLeft, setGraceDaysLeft] = useState(0);
+  const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
@@ -65,9 +66,13 @@ export default function DashboardLayout({
     );
     const { data: clienteData } = await crm
       .from("clientes")
-      .select("fecha_vencimiento")
+      .select("fecha_vencimiento, mp_init_point")
       .eq("tenant_id", data.tenant_id)
       .single();
+
+    if (clienteData?.mp_init_point) {
+      setPaymentUrl(clienteData.mp_init_point);
+    }
 
     if (clienteData?.fecha_vencimiento) {
       const now = new Date();
@@ -145,10 +150,10 @@ export default function DashboardLayout({
 
   switch (plan) {
     case "esencial":
-      return <SubscriptionContext.Provider value={{ expired: subscriptionExpired, atRisk: subscriptionAtRisk, graceDaysLeft }}><EsencialLayout>{children}</EsencialLayout>{chat}</SubscriptionContext.Provider>;
+      return <SubscriptionContext.Provider value={{ expired: subscriptionExpired, atRisk: subscriptionAtRisk, graceDaysLeft, paymentUrl }}><EsencialLayout>{children}</EsencialLayout>{chat}</SubscriptionContext.Provider>;
     case "emprendimiento":
-      return <SubscriptionContext.Provider value={{ expired: subscriptionExpired, atRisk: subscriptionAtRisk, graceDaysLeft }}><EmprendimientoLayout>{children}</EmprendimientoLayout>{chat}</SubscriptionContext.Provider>;
+      return <SubscriptionContext.Provider value={{ expired: subscriptionExpired, atRisk: subscriptionAtRisk, graceDaysLeft, paymentUrl }}><EmprendimientoLayout>{children}</EmprendimientoLayout>{chat}</SubscriptionContext.Provider>;
     case "empresa":
-      return <SubscriptionContext.Provider value={{ expired: subscriptionExpired, atRisk: subscriptionAtRisk, graceDaysLeft }}><EmpresaLayout>{children}</EmpresaLayout>{chat}</SubscriptionContext.Provider>;
+      return <SubscriptionContext.Provider value={{ expired: subscriptionExpired, atRisk: subscriptionAtRisk, graceDaysLeft, paymentUrl }}><EmpresaLayout>{children}</EmpresaLayout>{chat}</SubscriptionContext.Provider>;
   }
 }

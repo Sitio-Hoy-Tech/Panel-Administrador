@@ -5,11 +5,13 @@ import { AlertTriangle } from "lucide-react";
 import { useSubscription } from "./SubscriptionContext";
 
 export function GracePeriodBanner() {
-  const { atRisk, graceDaysLeft } = useSubscription();
+  const { atRisk, graceDaysLeft, paymentUrl } = useSubscription();
 
   if (!atRisk) return null;
 
   const dayLabel = graceDaysLeft === 1 ? "día" : "días";
+
+  const btnClass = "flex-shrink-0 rounded-lg bg-amber-500 hover:bg-amber-400 active:bg-amber-600 px-3.5 py-1.5 text-xs font-bold text-slate-950 transition-colors duration-150 whitespace-nowrap shadow-[0_0_12px_rgba(245,158,11,0.35)]";
 
   return (
     <div className="sticky top-0 z-20 w-full bg-gradient-to-r from-amber-950/80 via-orange-950/80 to-amber-950/80 border-b border-amber-500/25 backdrop-blur-sm">
@@ -31,12 +33,20 @@ export function GracePeriodBanner() {
             )}
           </p>
         </div>
-        <Link
-          href="/admin/mi-plan"
-          className="flex-shrink-0 rounded-lg bg-amber-500 hover:bg-amber-400 active:bg-amber-600 px-3.5 py-1.5 text-xs font-bold text-slate-950 transition-colors duration-150 whitespace-nowrap shadow-[0_0_12px_rgba(245,158,11,0.35)]"
-        >
-          Renovar ahora
-        </Link>
+        {paymentUrl ? (
+          <a
+            href={paymentUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={btnClass}
+          >
+            Renovar ahora
+          </a>
+        ) : (
+          <Link href="/admin/mi-plan" className={btnClass}>
+            Renovar ahora
+          </Link>
+        )}
       </div>
     </div>
   );
