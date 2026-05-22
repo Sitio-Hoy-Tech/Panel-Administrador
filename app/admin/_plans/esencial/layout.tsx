@@ -6,6 +6,7 @@ import { Menu, X } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
+import { GracePeriodBanner } from "@/components/shared/GracePeriodBanner";
 
 export default function EsencialLayout({
   children,
@@ -99,7 +100,7 @@ export default function EsencialLayout({
       <div className="flex-1 h-full relative group overflow-hidden lg:p-0 lg:rounded-[2rem]">
         <div className="hidden lg:block absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000 rounded-[2.5rem] pointer-events-none"></div>
         <main className="h-full bg-slate-950/30 backdrop-blur-md lg:rounded-[2rem] border-x-0 lg:border border-white/[0.07] shadow-[0_0_40px_rgba(0,0,0,0.8)] overflow-y-auto hide-scrollbar relative z-10">
-          {/* Content without floating logo */}
+          <GracePeriodBanner />
           <div className="p-6 md:p-10 lg:p-12">
             {children}
           </div>

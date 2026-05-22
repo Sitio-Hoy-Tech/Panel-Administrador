@@ -1,6 +1,51 @@
-import { CheckCircle2, CreditCard, ExternalLink, TrendingUp, Truck, BarChart3 } from "lucide-react";
+import { CheckCircle2, AlertTriangle, XCircle, CreditCard, TrendingUp, Truck, BarChart3 } from "lucide-react";
+import { getCurrentTenant } from "@/utils/auth";
+import { createClient } from "@supabase/supabase-js";
 
-export default function MiPlanPage() {
+type SubscriptionStatus = "active" | "at_risk" | "expired";
+
+export default async function MiPlanPage() {
+  const tenantId = await getCurrentTenant();
+  let nextPaymentDate: string | null = null;
+  let gracePeriodEndDate: string | null = null;
+  let subscriptionStatus: SubscriptionStatus = "active";
+
+  if (tenantId) {
+    const crmSupabase = createClient(
+      process.env.NEXT_PUBLIC_CRM_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_CRM_SUPABASE_ANON_KEY!
+    );
+    const { data } = await crmSupabase
+      .from("clientes")
+      .select("fecha_vencimiento")
+      .eq("tenant_id", tenantId)
+      .single();
+
+    if (data?.fecha_vencimiento) {
+      const vencimiento = new Date(data.fecha_vencimiento);
+      const now = new Date();
+      const graceEnd = new Date(vencimiento);
+      graceEnd.setDate(graceEnd.getDate() + 5);
+
+      const fmt = (d: Date) => d.toLocaleDateString("es-AR", {
+        day: "2-digit", month: "2-digit", year: "numeric",
+        timeZone: "America/Argentina/Buenos_Aires",
+      });
+
+      nextPaymentDate = fmt(vencimiento);
+      gracePeriodEndDate = fmt(graceEnd);
+
+      if (now > graceEnd) subscriptionStatus = "expired";
+      else if (now > vencimiento) subscriptionStatus = "at_risk";
+    }
+  }
+
+  const statusConfig = {
+    active:   { icon: CheckCircle2,  iconColor: "text-emerald-500", iconBg: "bg-emerald-500/10", label: "Suscripción Activa",    labelColor: "text-emerald-400" },
+    at_risk:  { icon: AlertTriangle, iconColor: "text-amber-500",   iconBg: "bg-amber-500/10",   label: "Suscripción en Riesgo", labelColor: "text-amber-400"   },
+    expired:  { icon: XCircle,       iconColor: "text-red-500",     iconBg: "bg-red-500/10",     label: "Suscripción Vencida",   labelColor: "text-red-400"     },
+  }[subscriptionStatus];
+  const StatusIcon = statusConfig.icon;
   return (
     <div className="max-w-3xl mx-auto space-y-8">
       <div>
@@ -12,12 +57,12 @@ export default function MiPlanPage() {
         {/* Header del Plan */}
         <div className="bg-surface border-b border-border p-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
-              <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+            <div className={`h-10 w-10 rounded-full ${statusConfig.iconBg} flex items-center justify-center`}>
+              <StatusIcon className={`h-5 w-5 ${statusConfig.iconColor}`} />
             </div>
             <div>
               <h2 className="text-lg font-bold text-foreground">Plan Empresa</h2>
-              <p className="text-sm text-emerald-400 font-medium">Suscripción Activa</p>
+              <p className={`text-sm font-medium ${statusConfig.labelColor}`}>{statusConfig.label}</p>
             </div>
           </div>
           <div className="text-right">
@@ -25,6 +70,26 @@ export default function MiPlanPage() {
             <p className="text-xs text-slate-400 uppercase tracking-wider mt-1">por mes</p>
           </div>
         </div>
+
+        {/* Banner de advertencia */}
+        {subscriptionStatus === "at_risk" && (
+          <div className="mx-6 mt-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-start gap-3">
+            <AlertTriangle className="h-4 w-4 text-amber-400 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-sm font-semibold text-amber-300">Tu suscripción está vencida</p>
+              <p className="text-xs text-amber-400/80 mt-0.5">Tenés plazo hasta el {gracePeriodEndDate} para renovar antes de que tu sitio sea suspendido.</p>
+            </div>
+          </div>
+        )}
+        {subscriptionStatus === "expired" && (
+          <div className="mx-6 mt-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 flex items-start gap-3">
+            <XCircle className="h-4 w-4 text-red-400 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-sm font-semibold text-red-300">Suscripción suspendida</p>
+              <p className="text-xs text-red-400/80 mt-0.5">El período de gracia venció. Contactá a soporte para renovar tu plan.</p>
+            </div>
+          </div>
+        )}
 
         {/* Detalles del Plan */}
         <div className="p-6 space-y-6">
@@ -79,13 +144,11 @@ export default function MiPlanPage() {
               <CreditCard className="h-5 w-5" />
               <div>
                 <p className="text-sm font-medium">Pago procesado vía MercadoPago</p>
-                <p className="text-xs text-slate-500">Próximo cobro automático: 15 del corriente mes</p>
+                <p className="text-xs text-slate-500">
+                  {subscriptionStatus === "active" ? "Próximo cobro automático" : "Fecha de vencimiento"}: {nextPaymentDate ?? "—"}
+                </p>
               </div>
             </div>
-            <button className="flex items-center justify-center gap-2 bg-surface hover:bg-surface-hover text-foreground px-4 py-2 rounded-lg font-medium transition-colors text-sm border border-border">
-              <ExternalLink className="h-4 w-4 text-slate-400" />
-              Gestionar Tarjeta
-            </button>
           </div>
         </div>
       </div>

@@ -1,11 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useTransition, useState, useEffect } from "react";
 import Image from "next/image";
-import { LayoutDashboard, Package, Settings, LogOut, ExternalLink, HelpCircle, CreditCard, BarChart3, Truck, Tag, Ticket, Clock } from "lucide-react";
+import { LayoutDashboard, Package, Settings, LogOut, ExternalLink, HelpCircle, CreditCard, BarChart3, Truck, Tag, Ticket, Clock, Lock } from "lucide-react";
 import clsx from "clsx";
 import { logout } from "@/actions/auth";
+import { useSubscription } from "@/components/shared/SubscriptionContext";
+
+const ALLOWED_WHEN_EXPIRED = ["/admin/mi-plan", "/admin/soporte"];
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -24,6 +28,29 @@ const secondaryNavigation = [
 
 export function Sidebar({ userName, storeUrl, onLinkClick }: { userName?: string, storeUrl?: string | null, onLinkClick?: () => void }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [pendingHref, setPendingHref] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isPending) setPendingHref(null);
+  }, [isPending]);
+
+  const handleNav = (e: React.MouseEvent, href: string) => {
+    e.preventDefault();
+    setPendingHref(href);
+    startTransition(() => router.push(href));
+    onLinkClick?.();
+  };
+
+  const isActive = (href: string) => {
+    const target = pendingHref ?? pathname;
+    if (href === "/admin") return target === href;
+    return target === href || target.startsWith(href + "/");
+  };
+
+  const isSecondaryActive = (href: string) => (pendingHref ?? pathname) === href;
+  const { expired } = useSubscription();
 
   return (
     <div className="flex h-full w-64 flex-col rounded-[2rem] bg-transparent px-2 py-6 relative">
@@ -42,31 +69,44 @@ export function Sidebar({ userName, storeUrl, onLinkClick }: { userName?: string
       <nav className="flex-1 space-y-8">
         <ul className="space-y-1.5">
           {navigation.map((item) => {
-            const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href + "/"));
+            const locked = expired && !ALLOWED_WHEN_EXPIRED.includes(item.href);
+            const active = !locked && isActive(item.href);
+            const pending = !locked && isPending && pendingHref === item.href;
             return (
               <li key={item.name}>
-                <Link
-                  href={item.href}
-                  onClick={onLinkClick}
-                  className={clsx(
-                    "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-300",
-                    isActive
-                      ? "bg-gradient-to-r from-primary/10 to-transparent text-primary"
-                      : "text-slate-400 hover:bg-white/[0.03] hover:text-foreground"
-                  )}
-                >
-                  {isActive && (
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-primary rounded-r-full shadow-[0_0_8px_rgba(244,244,245,0.5)]"></div>
-                  )}
-                  <item.icon
+                {locked ? (
+                  <div className="relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 cursor-not-allowed select-none">
+                    <item.icon className="h-5 w-5 flex-shrink-0 text-slate-700" aria-hidden="true" />
+                    {item.name}
+                    <Lock className="h-3 w-3 ml-auto text-slate-700" />
+                  </div>
+                ) : (
+                  <Link
+                    href={item.href}
+                    onClick={(e) => handleNav(e, item.href)}
                     className={clsx(
-                      "h-5 w-5 flex-shrink-0 transition-colors",
-                      isActive ? "text-primary" : "text-slate-500 group-hover:text-slate-300"
+                      "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-300",
+                      active
+                        ? "bg-gradient-to-r from-primary/10 to-transparent text-primary"
+                        : "text-slate-400 hover:bg-white/[0.03] hover:text-foreground"
                     )}
-                    aria-hidden="true"
-                  />
-                  {item.name}
-                </Link>
+                  >
+                    {active && (
+                      <div className={clsx(
+                        "absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-primary rounded-r-full shadow-[0_0_8px_rgba(244,244,245,0.5)]",
+                        pending && "animate-pulse"
+                      )} />
+                    )}
+                    <item.icon
+                      className={clsx(
+                        "h-5 w-5 flex-shrink-0 transition-colors",
+                        active ? "text-primary" : "text-slate-500 group-hover:text-slate-300"
+                      )}
+                      aria-hidden="true"
+                    />
+                    {item.name}
+                  </Link>
+                )}
               </li>
             );
           })}
@@ -78,26 +118,30 @@ export function Sidebar({ userName, storeUrl, onLinkClick }: { userName?: string
           </div>
           <ul className="space-y-1.5">
             {secondaryNavigation.map((item) => {
-              const isActive = pathname === item.href;
+              const active = isSecondaryActive(item.href);
+              const pending = isPending && pendingHref === item.href;
               return (
                 <li key={item.name}>
                   <Link
                     href={item.href}
-                    onClick={onLinkClick}
+                    onClick={(e) => handleNav(e, item.href)}
                     className={clsx(
                       "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-300",
-                      isActive
+                      active
                         ? "bg-gradient-to-r from-primary/10 to-transparent text-primary"
                         : "text-slate-400 hover:bg-white/[0.03] hover:text-foreground"
                     )}
                   >
-                    {isActive && (
-                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-primary rounded-r-full shadow-[0_0_8px_rgba(244,244,245,0.5)]"></div>
+                    {active && (
+                      <div className={clsx(
+                        "absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-primary rounded-r-full shadow-[0_0_8px_rgba(244,244,245,0.5)]",
+                        pending && "animate-pulse"
+                      )} />
                     )}
                     <item.icon
                       className={clsx(
                         "h-5 w-5 flex-shrink-0 transition-colors",
-                        isActive ? "text-primary" : "text-slate-500 group-hover:text-slate-300"
+                        active ? "text-primary" : "text-slate-500 group-hover:text-slate-300"
                       )}
                       aria-hidden="true"
                     />

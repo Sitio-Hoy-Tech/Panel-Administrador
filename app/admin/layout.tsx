@@ -2,15 +2,19 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { usePathname } from "next/navigation";
+import { createClient as createCrmClient } from "@supabase/supabase-js";
+import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 
 import EsencialLayout from "./_plans/esencial/layout";
 import EmprendimientoLayout from "./_plans/emprendimiento/layout";
 import EmpresaLayout from "./_plans/empresa/layout";
 import SupportChat from "@/components/shared/SupportChat";
+import { SubscriptionContext } from "@/components/shared/SubscriptionContext";
 
 type PlanType = "esencial" | "emprendimiento" | "empresa";
+
+const ALLOWED_WHEN_EXPIRED = ["/admin/mi-plan", "/admin/soporte"];
 
 export default function DashboardLayout({
   children,
@@ -19,7 +23,11 @@ export default function DashboardLayout({
 }>) {
   const [plan, setPlan] = useState<PlanType | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [subscriptionExpired, setSubscriptionExpired] = useState(false);
+  const [subscriptionAtRisk, setSubscriptionAtRisk] = useState(false);
+  const [graceDaysLeft, setGraceDaysLeft] = useState(0);
   const pathname = usePathname();
+  const router = useRouter();
   const supabase = createClient();
 
   const detectPlan = useCallback(async () => {
@@ -49,7 +57,38 @@ export default function DashboardLayout({
     } else {
       setPlan("esencial");
     }
+
+    // Verificar vencimiento de suscripción en el CRM
+    const crm = createCrmClient(
+      process.env.NEXT_PUBLIC_CRM_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_CRM_SUPABASE_ANON_KEY!
+    );
+    const { data: clienteData } = await crm
+      .from("clientes")
+      .select("fecha_vencimiento")
+      .eq("tenant_id", data.tenant_id)
+      .single();
+
+    if (clienteData?.fecha_vencimiento) {
+      const now = new Date();
+      const vencimiento = new Date(clienteData.fecha_vencimiento);
+      const graceEnd = new Date(vencimiento);
+      graceEnd.setDate(graceEnd.getDate() + 5);
+      setSubscriptionExpired(now > graceEnd);
+      const inGrace = now > vencimiento && now <= graceEnd;
+      setSubscriptionAtRisk(inGrace);
+      if (inGrace) {
+        setGraceDaysLeft(Math.ceil((graceEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+      }
+    }
   }, [supabase]);
+
+  // Redirigir si la suscripción venció y el usuario intenta acceder a una sección bloqueada
+  useEffect(() => {
+    if (subscriptionExpired && !ALLOWED_WHEN_EXPIRED.some(p => pathname.startsWith(p))) {
+      router.replace("/admin/mi-plan");
+    }
+  }, [subscriptionExpired, pathname, router]);
 
   // onAuthStateChange dispara inmediatamente con la sesión actual (INITIAL_SESSION),
   // cubriendo el montaje inicial y los cambios de auth sin necesidad de effects adicionales.
@@ -106,10 +145,10 @@ export default function DashboardLayout({
 
   switch (plan) {
     case "esencial":
-      return <><EsencialLayout>{children}</EsencialLayout>{chat}</>;
+      return <SubscriptionContext.Provider value={{ expired: subscriptionExpired, atRisk: subscriptionAtRisk, graceDaysLeft }}><EsencialLayout>{children}</EsencialLayout>{chat}</SubscriptionContext.Provider>;
     case "emprendimiento":
-      return <><EmprendimientoLayout>{children}</EmprendimientoLayout>{chat}</>;
+      return <SubscriptionContext.Provider value={{ expired: subscriptionExpired, atRisk: subscriptionAtRisk, graceDaysLeft }}><EmprendimientoLayout>{children}</EmprendimientoLayout>{chat}</SubscriptionContext.Provider>;
     case "empresa":
-      return <><EmpresaLayout>{children}</EmpresaLayout>{chat}</>;
+      return <SubscriptionContext.Provider value={{ expired: subscriptionExpired, atRisk: subscriptionAtRisk, graceDaysLeft }}><EmpresaLayout>{children}</EmpresaLayout>{chat}</SubscriptionContext.Provider>;
   }
 }

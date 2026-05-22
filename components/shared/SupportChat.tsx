@@ -59,6 +59,79 @@ export default function SupportChat({ accessToken }: Props) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const openRef = useRef(open);
+  useEffect(() => { openRef.current = open; }, [open]);
+
+  function playResolvedSound() {
+    try {
+      const ctx = new AudioContext();
+
+      // Arco ascendente → descendente estilo Skype end call
+      // Tono fundamental + armónico para darle cuerpo de campana
+      [1, 2.4].forEach((harmonic, i) => {
+        const osc  = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        const baseFreq = 480;
+        const t        = ctx.currentTime;
+        const vol      = i === 0 ? 0.32 : 0.10;
+        const dur      = i === 0 ? 1.1  : 0.7;
+
+        osc.type = "sine";
+        // Sube rápido hasta el pico, luego desciende lento
+        osc.frequency.setValueAtTime(baseFreq * harmonic, t);
+        osc.frequency.linearRampToValueAtTime(baseFreq * harmonic * 1.45, t + 0.12);
+        osc.frequency.exponentialRampToValueAtTime(baseFreq * harmonic * 0.6, t + dur);
+
+        // Ataque rápido + decay largo tipo campana
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(vol, t + 0.008);
+        gain.gain.setValueAtTime(vol, t + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+
+        osc.start(t);
+        osc.stop(t + dur);
+      });
+    } catch {
+      // silently fail
+    }
+  }
+
+  function playNotificationSound() {
+    try {
+      const ctx = new AudioContext();
+
+      // Tres notas ascendentes (E5 → G5 → B5) con ataque rápido y cuerpo
+      const notes = [
+        { freq: 659,  delay: 0,    dur: 0.18 },
+        { freq: 784,  delay: 0.16, dur: 0.18 },
+        { freq: 988,  delay: 0.32, dur: 0.45 },
+      ];
+
+      notes.forEach(({ freq, delay, dur }) => {
+        const osc  = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
+
+        const t = ctx.currentTime + delay;
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(0.38, t + 0.006); // ataque rápido
+        gain.gain.setValueAtTime(0.38, t + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+
+        osc.start(t);
+        osc.stop(t + dur);
+      });
+    } catch {
+      // El navegador puede bloquear AudioContext sin interacción previa
+    }
+  }
 
   useEffect(() => {
     if (!sessionId) return;
@@ -68,13 +141,16 @@ export default function SupportChat({ accessToken }: Props) {
         const msg = payload.new as Message;
         if (msg.sender_type === "agent") {
           setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, msg]);
-          setUnread(u => u + 1);
+          if (!openRef.current) {
+            setUnread(u => u + 1);
+            playNotificationSound();
+          }
         }
       })
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "chat_sessions", filter: `id=eq.${sessionId}` }, (payload) => {
         const updated = payload.new as { status: SessionStatus };
-        if (updated.status === "open") setScreen("chat");
-        if (updated.status === "closed") { setMessages([]); setScreen("resolved"); }
+        if (updated.status === "open") { setScreen("chat"); playNotificationSound(); }
+        if (updated.status === "closed") { setMessages([]); setScreen("resolved"); playResolvedSound(); }
       })
       .subscribe();
     return () => { crmSupabase.removeChannel(channel); };
