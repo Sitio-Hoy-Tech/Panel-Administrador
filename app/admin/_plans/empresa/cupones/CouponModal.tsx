@@ -91,8 +91,8 @@ export function CouponModal({ coupon, onClose, onSuccess }: CouponModalProps) {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-6">
-          <div className="space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 xl:p-6 overflow-y-auto custom-scrollbar space-y-6">
+          <div className="space-y-3 xl:space-y-4">
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-1">
                 Código del Cupón
@@ -100,7 +100,7 @@ export function CouponModal({ coupon, onClose, onSuccess }: CouponModalProps) {
               <input
                 type="text"
                 placeholder="EJ: VERANO20"
-                className="glass-input w-full uppercase py-4 px-5 text-lg font-bold tracking-widest"
+                className="glass-input w-full uppercase py-2.5 xl:py-4 px-5 text-base xl:text-lg font-bold tracking-widest"
                 value={formData.code}
                 onChange={e => setFormData({ ...formData, code: e.target.value.toUpperCase().replace(/\s/g, '') })}
                 required
@@ -117,25 +117,25 @@ export function CouponModal({ coupon, onClose, onSuccess }: CouponModalProps) {
                 <button
                   type="button"
                   onClick={() => setFormData({ ...formData, type: 'percent' })}
-                  className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all ${
-                    formData.type === 'percent' 
-                      ? 'bg-primary/10 border-primary text-primary' 
+                  className={`flex items-center justify-center gap-2 p-2 xl:flex-col xl:p-3 rounded-xl border transition-all ${
+                    formData.type === 'percent'
+                      ? 'bg-primary/10 border-primary text-primary'
                       : 'bg-white/[0.02] border-white/[0.05] text-slate-400 hover:bg-white/5 hover:text-white'
                   }`}
                 >
-                  <Percent className="h-5 w-5" />
+                  <Percent className="h-4 w-4 xl:h-5 xl:w-5" />
                   <span className="text-xs font-semibold">Porcentaje</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setFormData({ ...formData, type: 'fixed' })}
-                  className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all ${
-                    formData.type === 'fixed' 
-                      ? 'bg-primary/10 border-primary text-primary' 
+                  className={`flex items-center justify-center gap-2 p-2 xl:flex-col xl:p-3 rounded-xl border transition-all ${
+                    formData.type === 'fixed'
+                      ? 'bg-primary/10 border-primary text-primary'
                       : 'bg-white/[0.02] border-white/[0.05] text-slate-400 hover:bg-white/5 hover:text-white'
                   }`}
                 >
-                  <DollarSign className="h-5 w-5" />
+                  <DollarSign className="h-4 w-4 xl:h-5 xl:w-5" />
                   <span className="text-xs font-semibold">Monto Fijo</span>
                 </button>
               </div>
@@ -156,7 +156,7 @@ export function CouponModal({ coupon, onClose, onSuccess }: CouponModalProps) {
                 <input
                   type="number"
                   min="1"
-                  className="glass-input w-full pl-10 pr-5 py-3 text-lg font-bold"
+                  className="glass-input w-full pl-10 pr-5 py-2 xl:py-3 text-base xl:text-lg font-bold"
                   value={formData.value}
                   onChange={e => setFormData({ ...formData, value: e.target.value })}
                   required
@@ -165,10 +165,10 @@ export function CouponModal({ coupon, onClose, onSuccess }: CouponModalProps) {
               </div>
             </div>
 
-            <div className="pt-4 border-t border-white/[0.05]">
-              <h3 className="text-sm font-semibold text-white mb-4">Condiciones (Opcional)</h3>
-              
-              <div className="grid grid-cols-2 gap-4">
+            <div className="pt-3 xl:pt-4 border-t border-white/[0.05]">
+              <h3 className="text-sm font-semibold text-white mb-3 xl:mb-4">Condiciones (Opcional)</h3>
+
+              <div className="grid grid-cols-2 gap-3 xl:gap-4">
                 <div>
                   <label className="block text-xs font-medium text-slate-400 mb-1">
                     Compra mínima ($)
@@ -177,7 +177,7 @@ export function CouponModal({ coupon, onClose, onSuccess }: CouponModalProps) {
                     type="number"
                     min="0"
                     placeholder="Ej: 50000"
-                    className="glass-input w-full text-base py-3 px-4"
+                    className="glass-input w-full text-base py-2 xl:py-3 px-4"
                     value={formData.min_amount}
                     onChange={e => setFormData({ ...formData, min_amount: e.target.value })}
                   />
@@ -190,7 +190,7 @@ export function CouponModal({ coupon, onClose, onSuccess }: CouponModalProps) {
                     type="number"
                     min="1"
                     placeholder="Ej: 100"
-                    className="glass-input w-full text-base py-3 px-4"
+                    className="glass-input w-full text-base py-2 xl:py-3 px-4"
                     value={formData.max_uses}
                     onChange={e => setFormData({ ...formData, max_uses: e.target.value })}
                   />

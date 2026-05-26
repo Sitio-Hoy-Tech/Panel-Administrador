@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import imageCompression from "browser-image-compression";
 import { CustomNumberInput } from "@/components/empresa/CustomNumberInput";
 import { AttributeSelector } from "@/components/esencial/AttributeSelector";
+import { FormSelect } from "@/components/shared/FormSelect";
 
 export function ProductForm({ categories }: { categories: any[] }) {
   const router = useRouter();
@@ -113,17 +114,12 @@ export function ProductForm({ categories }: { categories: any[] }) {
 
           <div className="space-y-2">
             <label htmlFor="category_id" className="text-sm font-medium text-foreground">Categoría</label>
-            <select
-              id="category_id"
+            <FormSelect
               name="category_id"
-              className="glass-input px-4 py-3 appearance-none bg-slate-900/50 cursor-pointer"
+              options={categories.map((cat: any) => ({ value: cat.id, label: cat.name }))}
+              placeholder="Sin categoría"
               disabled={isPending}
-            >
-              <option value="">Sin categoría</option>
-              {categories.map((cat: any) => (
-                <option key={cat.id} value={cat.id}>{cat.name}</option>
-              ))}
-            </select>
+            />
           </div>
 
           <div className="space-y-2">

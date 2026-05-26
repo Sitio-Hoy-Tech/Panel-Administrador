@@ -57,14 +57,14 @@ export default async function OrdenesPage({
           <OrderFilters />
         </div>
 
-        <div className="md:overflow-visible overflow-x-visible md:overflow-x-auto max-h-[600px] md:max-h-none overflow-y-auto md:overflow-y-visible custom-scrollbar md:scrollbar-none">
+        <div className="overflow-x-auto">
           <OrderList orders={orders} />
         </div>
       </div>
 
       {/* Floating Pagination */}
       {totalPages > 1 && (
-        <div className="sticky bottom-10 left-0 right-0 bg-black/40/90 backdrop-blur-xl border border-white/[0.07] px-6 py-3 z-30 mt-8 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.7)]">
+        <div className="glass-panel px-6 py-3">
           <div className="flex items-center justify-between w-full">
             <div className="text-xs text-slate-500 hidden sm:block">
               Página <span className="text-slate-300 font-medium">{currentPage}</span> de <span className="text-slate-300 font-medium">{totalPages}</span>
