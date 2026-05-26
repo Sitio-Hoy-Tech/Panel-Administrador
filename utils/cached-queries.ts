@@ -21,7 +21,7 @@ export function getProductosCached(tenantId: string) {
       const { data, error } = await supabase
         .from("products")
         .select(`
-          id, name, description, price, sale_price, active, is_sale, position, category_id,
+          id, name, description, price, sale_price, active, is_sale, featured, position, category_id,
           product_images!fk_images_product ( url ),
           product_variants!fk_variants_product ( stock )
         `)
@@ -38,6 +38,7 @@ export function getProductosCached(tenantId: string) {
         sale_price: p.sale_price,
         active: p.active,
         is_sale: p.is_sale || false,
+        featured: p.featured || false,
         position: p.position,
         category_id: p.category_id ?? null,
         stock:

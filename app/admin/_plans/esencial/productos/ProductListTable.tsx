@@ -136,6 +136,7 @@ export function ProductListTable({
                     <div className="font-medium text-foreground text-base group-hover:text-primary transition-colors flex items-center gap-2">
                       {prod.name}
                       {!prod.active && <span className="px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 text-[10px] uppercase font-bold border border-white/[0.05]">Oculto</span>}
+                      {prod.featured && <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 text-[10px] uppercase font-bold border border-amber-500/20">Destacado</span>}
                       {prod.is_sale && <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] uppercase font-bold border border-emerald-500/20">En Oferta</span>}
                       {prod.stock !== null && prod.stock > 0 && prod.stock <= 5 && (
                         <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 text-[10px] uppercase font-bold border border-amber-500/20">Últimas Unidades</span>
@@ -173,7 +174,7 @@ export function ProductListTable({
               </td>
               <td className="px-6 py-4 text-right">
                 <div onClick={e => e.stopPropagation()}>
-                  <ProductActions product={{ id: prod.id, active: prod.active }} />
+                  <ProductActions product={{ id: prod.id, active: prod.active, featured: prod.featured ?? false }} />
                 </div>
               </td>
             </tr>

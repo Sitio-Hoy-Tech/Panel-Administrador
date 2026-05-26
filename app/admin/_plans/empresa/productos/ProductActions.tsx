@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Trash2, EyeOff, Eye, Loader2, Pencil } from "lucide-react";
-import { eliminarProducto, toggleProductoActivo } from "@/actions/empresa/productos";
+import { Trash2, EyeOff, Eye, Loader2, Pencil, Star } from "lucide-react";
+import { eliminarProducto, toggleProductoActivo, toggleProductoFeatured } from "@/actions/empresa/productos";
 import { ConfirmModal } from "@/components/empresa/ConfirmModal";
 import Link from "next/link";
 
@@ -10,6 +10,7 @@ interface ProductActionsProps {
   product: {
     id: string;
     active: boolean;
+    featured: boolean;
   };
 }
 
@@ -20,6 +21,12 @@ export function ProductActions({ product }: ProductActionsProps) {
   const handleToggleActive = async () => {
     setIsPending(true);
     await toggleProductoActivo(product.id, !product.active);
+    setIsPending(false);
+  };
+
+  const handleToggleFeatured = async () => {
+    setIsPending(true);
+    await toggleProductoFeatured(product.id, !product.featured);
     setIsPending(false);
   };
 
@@ -37,6 +44,16 @@ export function ProductActions({ product }: ProductActionsProps) {
   return (
     <>
       <div className="flex items-center justify-end gap-2">
+        {/* Destacar */}
+        <button
+          onClick={handleToggleFeatured}
+          disabled={isPending}
+          title={product.featured ? "Quitar destacado" : "Marcar como destacado"}
+          className={`p-2 rounded-lg transition-colors disabled:opacity-50 ${product.featured ? "text-amber-400 hover:text-amber-300 hover:bg-amber-500/10" : "text-slate-400 hover:text-amber-400 hover:bg-amber-500/10"}`}
+        >
+          <Star className={`h-4 w-4 ${product.featured ? "fill-amber-400" : ""}`} />
+        </button>
+
         {/* Pausar/Reanudar */}
         <button
           onClick={handleToggleActive}

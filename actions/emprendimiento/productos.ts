@@ -213,6 +213,26 @@ export async function toggleProductoActivo(productId: string, active: boolean) {
   return { success: true };
 }
 
+export async function toggleProductoFeatured(productId: string, featured: boolean) {
+  const tenantId = await getCurrentTenant();
+  if (!tenantId) return { error: "No autorizado" };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('products')
+    .update({ featured })
+    .eq('id', productId)
+    .eq('tenant_id', tenantId);
+
+  if (error) return { error: "Error al actualizar destacado." };
+
+  revalidateTag(TAGS.productos(tenantId), 'max');
+  revalidatePath("/admin/productos");
+  revalidatePath("/admin");
+  await revalidateStorefront(tenantId, "products");
+  return { success: true };
+}
+
 export async function getProductoById(productId: string) {
   const tenantId = await getCurrentTenant();
   if (!tenantId) return { error: "No autorizado" };
