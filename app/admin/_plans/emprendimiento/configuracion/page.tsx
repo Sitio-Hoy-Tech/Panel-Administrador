@@ -14,11 +14,11 @@ export default async function ConfiguracionPage() {
   const supabase = await createClient();
 
   const [{ data: tenant }, { data: zones }] = await Promise.all([
-    supabase.from('tenants').select('origin_phone').eq('id', tenantId).single(),
+    supabase.from('tenants').select('whatsapp').eq('id', tenantId).single(),
     supabase.from('shipping_zones').select('id, name, price').eq('tenant_id', tenantId).order('name', { ascending: true }),
   ]);
 
-  const initialPhone = tenant?.origin_phone ?? "";
+  const initialPhone = tenant?.whatsapp ?? "";
 
   return (
     <div className="max-w-3xl mx-auto space-y-8">

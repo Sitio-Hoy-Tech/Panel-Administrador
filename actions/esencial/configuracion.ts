@@ -30,7 +30,7 @@ export async function updatePhone(prevState: ActionState, formData: FormData): P
 
     const { error } = await supabase
       .from("tenants")
-      .update({ origin_phone: cleanPhone })
+      .update({ whatsapp: cleanPhone })
       .eq("id", tenantId);
 
     if (error) {

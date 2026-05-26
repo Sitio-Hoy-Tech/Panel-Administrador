@@ -15,11 +15,11 @@ export default async function ConfiguracionPage() {
 
   const { data: tenant } = await supabase
     .from('tenants')
-    .select('origin_phone')
+    .select('whatsapp')
     .eq('id', tenantId)
     .single();
 
-  const initialPhone = tenant?.origin_phone || "";
+  const initialPhone = tenant?.whatsapp || "";
 
   return (
     <div className="max-w-3xl mx-auto space-y-8">
