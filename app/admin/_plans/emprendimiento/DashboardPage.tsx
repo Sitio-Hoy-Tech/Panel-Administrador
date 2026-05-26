@@ -24,9 +24,12 @@ export default async function Dashboard() {
   ]);
 
   const maxProducts = 200; // Forzado para Plan Emprendimiento
-  const usagePercentage = ((currentProducts || 0) / maxProducts) * 100;
+  const currentProductsCount = currentProducts || 0;
+  const usagePercentage = (currentProductsCount / maxProducts) * 100;
+  const clampedPercentage = Math.min(usagePercentage, 100);
   const strokeDasharray = 283;
-  const strokeDashoffset = strokeDasharray - (strokeDasharray * usagePercentage) / 100;
+  const strokeDashoffset = strokeDasharray - (strokeDasharray * clampedPercentage) / 100;
+  const isAtLimit = currentProductsCount >= maxProducts;
 
   const baseDomain = process.env.NEXT_PUBLIC_STORE_DOMAIN || 'sitiohoy.com';
   const publicUrl = tenant?.url
@@ -51,13 +54,23 @@ export default async function Dashboard() {
             Gestioná tu tienda online de {tenant?.name || 'tu negocio'}. Productos, ordenes, envíos y cobros en un solo lugar.
           </p>
         </div>
-        <Link
-          href="/admin/productos/crear"
-          className="group inline-flex items-center gap-2 bg-white text-black px-5 py-2.5 rounded-full font-semibold hover:bg-slate-200 hover:scale-105 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
-        >
-          <Zap className="h-4 w-4 fill-black" />
-          Añadir Producto
-        </Link>
+        {isAtLimit ? (
+          <span
+            title="Alcanzaste el límite de productos de tu plan"
+            className="inline-flex items-center gap-2 bg-slate-800 text-slate-500 px-5 py-2.5 rounded-full font-semibold cursor-not-allowed opacity-60 border border-slate-700"
+          >
+            <Zap className="h-4 w-4" />
+            Límite alcanzado
+          </span>
+        ) : (
+          <Link
+            href="/admin/productos/crear"
+            className="group inline-flex items-center gap-2 bg-white text-black px-5 py-2.5 rounded-full font-semibold hover:bg-slate-200 hover:scale-105 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+          >
+            <Zap className="h-4 w-4 fill-black" />
+            Añadir Producto
+          </Link>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[minmax(180px,auto)]">
@@ -79,7 +92,7 @@ export default async function Dashboard() {
                 <circle cx="50" cy="50" r="45" className="stroke-white/10" strokeWidth="8" fill="none" />
                 <circle
                   cx="50" cy="50" r="45"
-                  className="stroke-blue-500 transition-all duration-1000 ease-out"
+                  className={`${isAtLimit ? 'stroke-red-500' : 'stroke-blue-500'} transition-all duration-1000 ease-out`}
                   strokeWidth="8"
                   fill="none"
                   strokeDasharray={strokeDasharray}
@@ -88,13 +101,15 @@ export default async function Dashboard() {
                 />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center flex-col">
-                <span className="text-xl font-bold text-white">{currentProducts || 0}</span>
+                <span className={`text-xl font-bold ${isAtLimit ? 'text-red-400' : 'text-white'}`}>{currentProductsCount}</span>
                 <span className="text-[10px] text-slate-500 font-medium">/{maxProducts}</span>
               </div>
             </div>
             <div>
               <p className="text-sm font-medium text-white mb-1">Productos</p>
-              <p className="text-xs text-slate-500">Capacidad al {Math.round(usagePercentage)}%</p>
+              <p className={`text-xs ${isAtLimit ? 'text-red-400 font-semibold' : 'text-slate-500'}`}>
+                {isAtLimit ? 'Límite alcanzado' : `Capacidad al ${Math.round(usagePercentage)}%`}
+              </p>
             </div>
           </div>
         </div>

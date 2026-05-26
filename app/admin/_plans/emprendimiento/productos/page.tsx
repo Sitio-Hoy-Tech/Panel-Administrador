@@ -41,6 +41,7 @@ export default async function ProductosPage({
   const totalProductosCount = allProductos?.length || 0;
   const filteredCount = filteredProductos.length;
   const maxProducts = 200;
+  const isAtLimit = totalProductosCount >= maxProducts;
 
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
@@ -61,13 +62,23 @@ export default async function ProductosPage({
             )}
           </p>
         </div>
-        <Link
-          href="/admin/productos/crear"
-          className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors"
-        >
-          <Plus className="h-5 w-5" />
-          Nuevo Producto
-        </Link>
+        {isAtLimit ? (
+          <span
+            title="Alcanzaste el límite de productos de tu plan"
+            className="flex items-center gap-2 bg-slate-800 text-slate-500 px-4 py-2 rounded-lg font-medium cursor-not-allowed opacity-60 border border-slate-700"
+          >
+            <Plus className="h-5 w-5" />
+            Límite alcanzado
+          </span>
+        ) : (
+          <Link
+            href="/admin/productos/crear"
+            className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors"
+          >
+            <Plus className="h-5 w-5" />
+            Nuevo Producto
+          </Link>
+        )}
       </div>
 
       <ProductFilters categories={categories || []} />
