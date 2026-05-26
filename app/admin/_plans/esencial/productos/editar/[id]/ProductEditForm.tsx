@@ -7,6 +7,7 @@ import { actualizarProducto } from "@/actions/esencial/productos";
 import { useRouter } from "next/navigation";
 import imageCompression from "browser-image-compression";
 import { CustomNumberInput } from "@/components/esencial/CustomNumberInput";
+import { AttributeSelector } from "@/components/esencial/AttributeSelector";
 
 interface ProductEditFormProps {
   product: {
@@ -18,6 +19,7 @@ interface ProductEditFormProps {
     is_sale?: boolean;
     product_images: { id: string; url: string; position: number }[];
     stock?: number | null;
+    attributes?: { id: string; name: string; values: { id: string; value: string }[] }[];
   };
 }
 
@@ -291,6 +293,11 @@ export function ProductEditForm({ product }: ProductEditFormProps) {
             suppressHydrationWarning
           />
         </div>
+
+        <AttributeSelector
+          initialAttributes={product.attributes ?? []}
+          disabled={isPending}
+        />
 
         <div className="space-y-2">
           <label className="text-sm font-medium text-foreground">Fotos</label>

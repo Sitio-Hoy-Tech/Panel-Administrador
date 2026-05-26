@@ -7,6 +7,7 @@ import { crearProducto } from "@/actions/esencial/productos";
 import { useRouter } from "next/navigation";
 import imageCompression from "browser-image-compression";
 import { CustomNumberInput } from "@/components/esencial/CustomNumberInput";
+import { AttributeSelector } from "@/components/esencial/AttributeSelector";
 
 export function ProductForm() {
   const router = useRouter();
@@ -189,6 +190,8 @@ export function ProductForm() {
             suppressHydrationWarning
           />
         </div>
+
+        <AttributeSelector disabled={isPending} />
 
         <div className="space-y-2">
           <label className="text-sm font-medium text-foreground">Fotos (Opcional)</label>

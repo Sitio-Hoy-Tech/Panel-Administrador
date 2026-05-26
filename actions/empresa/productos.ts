@@ -142,6 +142,13 @@ export async function crearProducto(formData: FormData) {
     }
   }
 
+  // Sincronizar atributos si se enviaron
+  const attributesJson = formData.get("attributes_json") as string | null;
+  if (attributesJson) {
+    const { syncAtributosProducto } = await import("@/actions/esencial/atributos");
+    await syncAtributosProducto(productData.id, attributesJson);
+  }
+
   revalidateTag(TAGS.productos(tenantId), 'max');
   revalidatePath("/admin/productos");
   revalidatePath("/admin");
@@ -230,7 +237,8 @@ export async function getProductoById(productId: string) {
       active,
       is_sale,
       product_images!fk_images_product ( id, url, position ),
-      product_variants!fk_variants_product ( id, stock, name )
+      product_variants!fk_variants_product ( id, stock, name ),
+      product_attributes ( id, name, position, product_attribute_values ( id, value, position ) )
     `)
     .eq('id', productId)
     .eq('tenant_id', tenantId)
@@ -238,17 +246,26 @@ export async function getProductoById(productId: string) {
 
   if (error) return { error: "Error al cargar el producto." };
 
-  // Mapeamos para que la UI de edición simple encuentre el stock
-  const firstVariant = producto.product_variants && producto.product_variants.length > 0 
-    ? producto.product_variants[0] 
+  const firstVariant = producto.product_variants && producto.product_variants.length > 0
+    ? producto.product_variants[0]
     : null;
 
-  return { 
-    success: true, 
+  const attributes = (producto.product_attributes ?? [])
+    .sort((a: any, b: any) => a.position - b.position)
+    .map((a: any) => ({
+      id: a.id,
+      name: a.name,
+      position: a.position,
+      values: (a.product_attribute_values ?? []).sort((x: any, y: any) => x.position - y.position),
+    }));
+
+  return {
+    success: true,
     data: {
       ...producto,
-      stock: firstVariant?.stock || 0
-    } 
+      stock: firstVariant?.stock || 0,
+      attributes,
+    }
   };
 }
 
@@ -380,6 +397,13 @@ export async function actualizarProducto(productId: string, formData: FormData) 
         position: position
       });
     }
+  }
+
+  // Sincronizar atributos
+  const attributesJson = formData.get("attributes_json") as string | null;
+  if (attributesJson) {
+    const { syncAtributosProducto } = await import("@/actions/esencial/atributos");
+    await syncAtributosProducto(productId, attributesJson);
   }
 
   revalidateTag(TAGS.productos(tenantId), 'max');

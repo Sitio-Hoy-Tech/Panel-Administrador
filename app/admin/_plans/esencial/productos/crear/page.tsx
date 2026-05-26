@@ -2,7 +2,8 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { ProductForm } from "./ProductForm";
 
-export default function CrearProductoPage() {
+export default async function CrearProductoPage() {
+
   return (
     <div className="w-full space-y-8">
       <div className="flex items-center gap-4">

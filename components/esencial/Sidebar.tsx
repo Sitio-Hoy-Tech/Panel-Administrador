@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTransition, useState, useEffect } from "react";
 import Image from "next/image";
-import { LayoutDashboard, Package, Settings, LogOut, ExternalLink, HelpCircle, CreditCard, Clock, Lock } from "lucide-react";
+import { LayoutDashboard, Package, Settings, LogOut, ExternalLink, HelpCircle, CreditCard, Tag, Clock, Lock } from "lucide-react";
 import clsx from "clsx";
 import { logout } from "@/actions/auth";
 import { useSubscription } from "@/components/shared/SubscriptionContext";
@@ -14,6 +14,7 @@ const ALLOWED_WHEN_EXPIRED = ["/admin/mi-plan", "/admin/soporte"];
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Catálogo", href: "/admin/productos", icon: Package },
+  { name: "Categorías", href: "/admin/categorias", icon: Tag },
   { name: "Configuración", href: "/admin/configuracion", icon: Settings },
 ];
 

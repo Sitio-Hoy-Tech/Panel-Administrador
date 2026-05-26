@@ -7,6 +7,7 @@ import { crearProducto } from "@/actions/empresa/productos";
 import { useRouter } from "next/navigation";
 import imageCompression from "browser-image-compression";
 import { CustomNumberInput } from "@/components/empresa/CustomNumberInput";
+import { AttributeSelector } from "@/components/esencial/AttributeSelector";
 
 export function ProductForm({ categories }: { categories: any[] }) {
   const router = useRouter();
@@ -202,9 +203,11 @@ export function ProductForm({ categories }: { categories: any[] }) {
           />
         </div>
 
+        <AttributeSelector disabled={isPending} />
+
         <div className="space-y-2">
           <label className="text-sm font-medium text-foreground">Fotos (Opcional)</label>
-          
+
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {previewUrls.map((url, i) => (
               <div key={i} className="relative aspect-square rounded-2xl overflow-hidden group border border-white/[0.07]">

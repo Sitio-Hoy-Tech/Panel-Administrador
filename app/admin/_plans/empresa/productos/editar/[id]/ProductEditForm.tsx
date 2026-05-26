@@ -7,6 +7,7 @@ import { actualizarProducto } from "@/actions/empresa/productos";
 import { useRouter } from "next/navigation";
 import imageCompression from "browser-image-compression";
 import { CustomNumberInput } from "@/components/empresa/CustomNumberInput";
+import { AttributeSelector } from "@/components/esencial/AttributeSelector";
 
 interface ProductEditFormProps {
   product: {
@@ -19,6 +20,7 @@ interface ProductEditFormProps {
     is_sale?: boolean;
     sale_price?: number | null;
     product_images: { id: string; url: string; position: number }[];
+    attributes?: { id: string; name: string; values: { id: string; value: string }[] }[];
   };
   categories: any[];
 }
@@ -311,13 +313,18 @@ export function ProductEditForm({ product, categories }: ProductEditFormProps) {
           />
         </div>
 
+        <AttributeSelector
+          initialAttributes={product.attributes ?? []}
+          disabled={isPending}
+        />
+
         <div className="space-y-2">
           <label className="text-sm font-medium text-foreground">Fotos</label>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {images.map((img, i) => (
-              <div 
-                key={img.id} 
+              <div
+                key={img.id}
                 draggable
                 onDragStart={(e) => handleDragStart(e, i)}
                 onDragOver={(e) => handleDragOver(e, i)}

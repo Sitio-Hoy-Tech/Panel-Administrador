@@ -13,7 +13,7 @@ export default async function EditarProductoPage({
   const { id } = await params;
   const [{ data: product, error }, { data: categories }] = await Promise.all([
     getProductoById(id),
-    getCategorias()
+    getCategorias(),
   ]);
 
   if (error || !product) {
