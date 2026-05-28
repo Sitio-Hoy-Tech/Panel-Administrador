@@ -21,7 +21,7 @@ export function getProductosCached(tenantId: string) {
       const { data, error } = await supabase
         .from("products")
         .select(`
-          id, name, description, price, sale_price, active, is_sale, featured, position, category_id,
+          id, name, description, price, sale_price, active, is_sale, featured, position, category_id, subcategory_id,
           product_images!fk_images_product ( url ),
           product_variants!fk_variants_product ( stock )
         `)
@@ -41,6 +41,7 @@ export function getProductosCached(tenantId: string) {
         featured: p.featured || false,
         position: p.position,
         category_id: p.category_id ?? null,
+        subcategory_id: p.subcategory_id ?? null,
         stock:
           p.product_variants?.length > 0
             ? p.product_variants.reduce((acc: number, v: any) => acc + (v.stock || 0), 0)
@@ -59,12 +60,21 @@ export function getCategoriasCached(tenantId: string) {
       const supabase = createAdminClient();
       const { data, error } = await supabase
         .from("categories")
-        .select("*")
+        .select(`
+          id, name, slug, active, position,
+          subcategories!fk_subcategories_category ( id, name, slug, active, position )
+        `)
         .eq("tenant_id", tenantId)
         .order("position", { ascending: true });
 
       if (error) return null;
-      return data;
+
+      return data.map((cat: any) => ({
+        ...cat,
+        subcategories: (cat.subcategories ?? []).sort(
+          (a: any, b: any) => (a.position ?? 0) - (b.position ?? 0)
+        ),
+      }));
     },
     [`categorias:${tenantId}`],
     { tags: [TAGS.categorias(tenantId)] }

@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { ProductForm } from "./ProductForm";
+import { getCategorias } from "@/actions/esencial/categorias";
 
 export default async function CrearProductoPage() {
+  const { data: categories } = await getCategorias();
 
   return (
     <div className="w-full space-y-8">
@@ -16,7 +18,7 @@ export default async function CrearProductoPage() {
         </div>
       </div>
 
-      <ProductForm />
+      <ProductForm categories={categories || []} />
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import imageCompression from "browser-image-compression";
 import { CustomNumberInput } from "@/components/esencial/CustomNumberInput";
 import { AttributeSelector } from "@/components/esencial/AttributeSelector";
+import { CategorySubcategorySelect } from "@/components/shared/CategorySubcategorySelect";
 
 interface ProductEditFormProps {
   product: {
@@ -17,13 +18,16 @@ interface ProductEditFormProps {
     price: number;
     sale_price?: number | null;
     is_sale?: boolean;
+    category_id?: string | null;
+    subcategory_id?: string | null;
     product_images: { id: string; url: string; position: number }[];
     stock?: number | null;
     attributes?: { id: string; name: string; values: { id: string; value: string }[] }[];
   };
+  categories: any[];
 }
 
-export function ProductEditForm({ product }: ProductEditFormProps) {
+export function ProductEditForm({ product, categories }: ProductEditFormProps) {
   const router = useRouter();
   const [isPending, setIsPending] = useState(false);
   const [isCompressing, setIsCompressing] = useState(false);
@@ -212,6 +216,13 @@ export function ProductEditForm({ product }: ProductEditFormProps) {
             suppressHydrationWarning
           />
         </div>
+
+        <CategorySubcategorySelect
+          categories={categories}
+          defaultCategoryId={product.category_id}
+          defaultSubcategoryId={product.subcategory_id}
+          disabled={isPending}
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">

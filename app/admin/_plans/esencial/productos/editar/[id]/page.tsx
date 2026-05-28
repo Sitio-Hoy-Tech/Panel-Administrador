@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { ProductEditForm } from "./ProductEditForm";
 import { getProductoById } from "@/actions/esencial/productos";
+import { getCategorias } from "@/actions/esencial/categorias";
 import { notFound } from "next/navigation";
 
 export default async function EditarProductoPage({
@@ -10,7 +11,10 @@ export default async function EditarProductoPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { data: product, error } = await getProductoById(id);
+  const [{ data: product, error }, { data: categories }] = await Promise.all([
+    getProductoById(id),
+    getCategorias(),
+  ]);
 
   if (error || !product) {
     notFound();
@@ -28,7 +32,7 @@ export default async function EditarProductoPage({
         </div>
       </div>
 
-      <ProductEditForm product={product} />
+      <ProductEditForm product={product} categories={categories || []} />
     </div>
   );
 }

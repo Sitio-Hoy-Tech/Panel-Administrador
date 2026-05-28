@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import imageCompression from "browser-image-compression";
 import { CustomNumberInput } from "@/components/empresa/CustomNumberInput";
 import { AttributeSelector } from "@/components/esencial/AttributeSelector";
-import { FormSelect } from "@/components/shared/FormSelect";
+import { CategorySubcategorySelect } from "@/components/shared/CategorySubcategorySelect";
 
 export function ProductForm({ categories }: { categories: any[] }) {
   const router = useRouter();
@@ -112,15 +112,10 @@ export function ProductForm({ categories }: { categories: any[] }) {
             />
           </div>
 
-          <div className="space-y-2">
-            <label htmlFor="category_id" className="text-sm font-medium text-foreground">Categoría</label>
-            <FormSelect
-              name="category_id"
-              options={categories.map((cat: any) => ({ value: cat.id, label: cat.name }))}
-              placeholder="Sin categoría"
-              disabled={isPending}
-            />
-          </div>
+          <CategorySubcategorySelect
+            categories={categories}
+            disabled={isPending}
+          />
 
           <div className="space-y-2">
             <label htmlFor="price" className="text-sm font-medium text-foreground">Precio (ARS) *</label>

@@ -75,9 +75,6 @@ export async function eliminarCategoria(id: string) {
   if (!tenantId) return { error: "No autorizado" };
 
   const supabase = await createClient();
-  
-  // Opcional: Podríamos verificar si hay productos usando esta categoría
-  // Pero por ahora solo borramos la categoría
   const { error } = await supabase
     .from('categories')
     .delete()
@@ -85,6 +82,104 @@ export async function eliminarCategoria(id: string) {
     .eq('tenant_id', tenantId);
 
   if (error) return { error: "Error al eliminar la categoría." };
+
+  revalidateTag(TAGS.categorias(tenantId), 'max');
+  revalidateTag(TAGS.productos(tenantId), 'max');
+  revalidatePath("/admin/categorias");
+  revalidatePath("/admin/productos");
+  await revalidateStorefront(tenantId, "categories");
+  return { success: true };
+}
+
+function buildSubcategorySlug(base: string) {
+  return base.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+}
+
+export async function crearSubcategoria(categoryId: string, formData: FormData) {
+  const tenantId = await getCurrentTenant();
+  if (!tenantId) return { error: "No autorizado" };
+
+  const name = formData.get("name") as string;
+  if (!name) return { error: "El nombre es obligatorio." };
+
+  const supabase = await createClient();
+
+  const { data: parent } = await supabase
+    .from('categories')
+    .select('slug')
+    .eq('id', categoryId)
+    .eq('tenant_id', tenantId)
+    .single();
+
+  const baseSlug = buildSubcategorySlug(name);
+  const prefixed = parent ? `${parent.slug}-${baseSlug}` : baseSlug;
+
+  let slug = prefixed;
+  let attempt = 1;
+
+  while (attempt <= 10) {
+    const { error } = await supabase
+      .from('subcategories')
+      .insert({ tenant_id: tenantId, category_id: categoryId, name, slug, active: true });
+
+    if (!error) {
+      revalidateTag(TAGS.categorias(tenantId), 'max');
+      revalidateTag(TAGS.productos(tenantId), 'max');
+      revalidatePath("/admin/categorias");
+      revalidatePath("/admin/productos");
+      await revalidateStorefront(tenantId, "categories");
+      return { success: true };
+    }
+
+    if (error.code === '23505') {
+      attempt++;
+      slug = `${prefixed}-${attempt}`;
+    } else {
+      return { error: "Error al crear la subcategoría." };
+    }
+  }
+
+  return { error: "No se pudo generar un slug único para la subcategoría." };
+}
+
+export async function actualizarSubcategoria(id: string, formData: FormData) {
+  const tenantId = await getCurrentTenant();
+  if (!tenantId) return { error: "No autorizado" };
+
+  const name = formData.get("name") as string;
+  const active = formData.get("active") === "true";
+
+  if (!name) return { error: "El nombre es obligatorio." };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('subcategories')
+    .update({ name, active })
+    .eq('id', id)
+    .eq('tenant_id', tenantId);
+
+  if (error) return { error: "Error al actualizar la subcategoría." };
+
+  revalidateTag(TAGS.categorias(tenantId), 'max');
+  revalidateTag(TAGS.productos(tenantId), 'max');
+  revalidatePath("/admin/categorias");
+  revalidatePath("/admin/productos");
+  await revalidateStorefront(tenantId, "categories");
+  return { success: true };
+}
+
+export async function eliminarSubcategoria(id: string) {
+  const tenantId = await getCurrentTenant();
+  if (!tenantId) return { error: "No autorizado" };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('subcategories')
+    .delete()
+    .eq('id', id)
+    .eq('tenant_id', tenantId);
+
+  if (error) return { error: "Error al eliminar la subcategoría." };
 
   revalidateTag(TAGS.categorias(tenantId), 'max');
   revalidateTag(TAGS.productos(tenantId), 'max');

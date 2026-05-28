@@ -16,9 +16,10 @@ interface FormSelectProps {
   placeholder?: string;
   disabled?: boolean;
   label?: string;
+  onChange?: (value: string) => void;
 }
 
-export function FormSelect({ name, options, defaultValue = "", placeholder = "Seleccionar...", disabled = false }: FormSelectProps) {
+export function FormSelect({ name, options, defaultValue = "", placeholder = "Seleccionar...", disabled = false, onChange }: FormSelectProps) {
   const [value, setValue] = useState(defaultValue);
   const [open, setOpen] = useState(false);
   const [rect, setRect] = useState<DOMRect | null>(null);
@@ -41,8 +42,15 @@ export function FormSelect({ name, options, defaultValue = "", placeholder = "Se
       if (btnRef.current?.contains(e.target as Node)) return;
       setOpen(false);
     };
+    const updatePos = () => {
+      if (btnRef.current) setRect(btnRef.current.getBoundingClientRect());
+    };
     document.addEventListener("mousedown", close);
-    return () => document.removeEventListener("mousedown", close);
+    window.addEventListener("scroll", updatePos, true);
+    return () => {
+      document.removeEventListener("mousedown", close);
+      window.removeEventListener("scroll", updatePos, true);
+    };
   }, [open]);
 
   const menuStyle: React.CSSProperties = rect ? (() => {
@@ -84,7 +92,7 @@ export function FormSelect({ name, options, defaultValue = "", placeholder = "Se
             <button
               type="button"
               onMouseDown={e => e.stopPropagation()}
-              onClick={() => { setValue(""); setOpen(false); }}
+              onClick={() => { setValue(""); onChange?.(""); setOpen(false); }}
               className={`flex items-center justify-between w-full px-4 py-2.5 text-sm transition-colors ${value === "" ? "bg-white/5 text-white font-medium" : "text-slate-400 hover:bg-white/5 hover:text-white"}`}
             >
               {placeholder}
@@ -96,7 +104,7 @@ export function FormSelect({ name, options, defaultValue = "", placeholder = "Se
                 key={opt.value}
                 type="button"
                 onMouseDown={e => e.stopPropagation()}
-                onClick={() => { setValue(opt.value); setOpen(false); }}
+                onClick={() => { setValue(opt.value); onChange?.(opt.value); setOpen(false); }}
                 className={`flex items-center justify-between w-full px-4 py-2.5 text-sm transition-colors ${value === opt.value ? "bg-emerald-500/10 text-emerald-400 font-medium" : "text-slate-400 hover:bg-white/5 hover:text-white"}`}
               >
                 {opt.label}

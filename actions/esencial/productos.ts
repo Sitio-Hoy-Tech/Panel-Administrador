@@ -48,6 +48,8 @@ export async function crearProducto(formData: FormData) {
 
   const name = formData.get("name") as string;
   const description = formData.get("description") as string;
+  const category_id = formData.get("category_id") as string || null;
+  const subcategory_id = formData.get("subcategory_id") as string || null;
   const price = formData.get("price") ? parseFloat(formData.get("price") as string) : 0;
   const sale_price = formData.get("sale_price") ? parseFloat(formData.get("sale_price") as string) : null;
   const stock = formData.get("stock") ? parseInt(formData.get("stock") as string) : null;
@@ -84,6 +86,8 @@ export async function crearProducto(formData: FormData) {
       name,
       slug: uniqueSlug,
       description,
+      category_id,
+      subcategory_id,
       price,
       sale_price,
       is_sale,
@@ -303,6 +307,8 @@ export async function getProductoById(productId: string) {
       description,
       price,
       sale_price,
+      category_id,
+      subcategory_id,
       active,
       is_sale,
       product_images!fk_images_product ( id, url, position ),
@@ -352,6 +358,8 @@ export async function actualizarProducto(productId: string, formData: FormData) 
 
   const name = formData.get("name") as string;
   const description = formData.get("description") as string;
+  const category_id = formData.get("category_id") as string || null;
+  const subcategory_id = formData.get("subcategory_id") as string || null;
   const price = formData.get("price") ? parseFloat(formData.get("price") as string) : 0;
   const sale_price = formData.get("sale_price") ? parseFloat(formData.get("sale_price") as string) : null;
   const stock = formData.get("stock") ? parseInt(formData.get("stock") as string) : null;
@@ -379,6 +387,8 @@ export async function actualizarProducto(productId: string, formData: FormData) 
       name,
       slug: updatedSlug,
       description,
+      category_id,
+      subcategory_id,
       price,
       sale_price,
       is_sale

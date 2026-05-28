@@ -8,8 +8,9 @@ import { useRouter } from "next/navigation";
 import imageCompression from "browser-image-compression";
 import { CustomNumberInput } from "@/components/esencial/CustomNumberInput";
 import { AttributeSelector } from "@/components/esencial/AttributeSelector";
+import { CategorySubcategorySelect } from "@/components/shared/CategorySubcategorySelect";
 
-export function ProductForm() {
+export function ProductForm({ categories }: { categories: any[] }) {
   const router = useRouter();
   const [isPending, setIsPending] = useState(false);
   const [isCompressing, setIsCompressing] = useState(false);
@@ -113,6 +114,11 @@ export function ProductForm() {
             suppressHydrationWarning
           />
         </div>
+
+        <CategorySubcategorySelect
+          categories={categories}
+          disabled={isPending}
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">

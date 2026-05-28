@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import imageCompression from "browser-image-compression";
 import { CustomNumberInput } from "@/components/empresa/CustomNumberInput";
 import { AttributeSelector } from "@/components/esencial/AttributeSelector";
-import { FormSelect } from "@/components/shared/FormSelect";
+import { CategorySubcategorySelect } from "@/components/shared/CategorySubcategorySelect";
 
 interface ProductEditFormProps {
   product: {
@@ -17,6 +17,7 @@ interface ProductEditFormProps {
     description: string;
     price: number;
     category_id?: string | null;
+    subcategory_id?: string | null;
     stock?: number | null;
     is_sale?: boolean;
     sale_price?: number | null;
@@ -217,16 +218,12 @@ export function ProductEditForm({ product, categories }: ProductEditFormProps) {
             />
           </div>
 
-          <div className="space-y-2">
-            <label htmlFor="category_id" className="text-sm font-medium text-foreground">Categoría</label>
-            <FormSelect
-              name="category_id"
-              options={categories.map((cat: any) => ({ value: cat.id, label: cat.name }))}
-              defaultValue={product.category_id || ""}
-              placeholder="Sin categoría"
-              disabled={isPending}
-            />
-          </div>
+          <CategorySubcategorySelect
+            categories={categories}
+            defaultCategoryId={product.category_id}
+            defaultSubcategoryId={(product as any).subcategory_id}
+            disabled={isPending}
+          />
 
           <div className="space-y-2">
             <label htmlFor="price" className="text-sm font-medium text-foreground">Precio (ARS) *</label>

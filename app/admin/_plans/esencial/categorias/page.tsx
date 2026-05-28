@@ -1,7 +1,8 @@
 import { Plus, Tag } from "lucide-react";
-import { getCategorias } from "@/actions/esencial/categorias";
+import { getCategorias, crearSubcategoria, actualizarSubcategoria, eliminarSubcategoria } from "@/actions/esencial/categorias";
 import { CategoryForm } from "./CategoryForm";
 import { CategoryActions } from "./CategoryActions";
+import { SubcategoryManager } from "@/components/shared/SubcategoryManager";
 
 export default async function CategoriasPage() {
   const { data: categorias, error } = await getCategorias();
@@ -38,25 +39,32 @@ export default async function CategoriasPage() {
           ) : (
             <div className="grid grid-cols-1 gap-4">
               {categorias.map((cat: any) => (
-                <div key={cat.id} className="glass-panel p-5 flex items-center justify-between group hover:border-white/[0.07] transition-all duration-300">
-                  <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 bg-emerald-500/10 rounded-lg flex items-center justify-center border border-emerald-500/20">
-                      <Tag className="h-5 w-5 text-emerald-400" />
+                <div key={cat.id} className="glass-panel p-5 group hover:border-white/[0.07] transition-all duration-300">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="h-10 w-10 bg-emerald-500/10 rounded-lg flex items-center justify-center border border-emerald-500/20">
+                        <Tag className="h-5 w-5 text-emerald-400" />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-white group-hover:text-emerald-400 transition-colors">{cat.name}</h4>
+                        <p className="text-xs text-slate-500 uppercase tracking-widest">{cat.slug}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="font-bold text-white group-hover:text-emerald-400 transition-colors">{cat.name}</h4>
-                      <p className="text-xs text-slate-500 uppercase tracking-widest">{cat.slug}</p>
+                    <div className="flex items-center gap-2">
+                      <div className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider ${
+                        cat.active ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-500/10 text-slate-500'
+                      }`}>
+                        {cat.active ? 'Activa' : 'Inactiva'}
+                      </div>
+                      <CategoryActions category={cat} />
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider ${
-                      cat.active ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-500/10 text-slate-500'
-                    }`}>
-                      {cat.active ? 'Activa' : 'Inactiva'}
-                    </div>
-                    <CategoryActions category={cat} />
-                  </div>
+                  <SubcategoryManager
+                    category={cat}
+                    onCreate={crearSubcategoria}
+                    onUpdate={actualizarSubcategoria}
+                    onDelete={eliminarSubcategoria}
+                  />
                 </div>
               ))}
             </div>
