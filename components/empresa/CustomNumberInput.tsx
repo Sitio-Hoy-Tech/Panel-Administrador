@@ -16,6 +16,19 @@ interface CustomNumberInputProps {
   suppressHydrationWarning?: boolean;
 }
 
+function formatDisplay(val: string | number): string {
+  if (val === "" || val === undefined || val === null) return "";
+  const digits = String(val).replace(/\./g, "");
+  if (digits === "") return "";
+  const num = parseInt(digits, 10);
+  if (isNaN(num)) return digits;
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+function toRaw(display: string): string {
+  return display.replace(/\./g, "");
+}
+
 export function CustomNumberInput({
   id,
   name,
@@ -26,37 +39,38 @@ export function CustomNumberInput({
   disabled,
   className = "",
   prefix,
-  suppressHydrationWarning,
 }: CustomNumberInputProps) {
-  const [value, setValue] = useState<string | number>(defaultValue);
+  const [displayValue, setDisplayValue] = useState<string>(() => formatDisplay(defaultValue));
 
   useEffect(() => {
-    setValue(defaultValue);
+    setDisplayValue(formatDisplay(defaultValue));
   }, [defaultValue]);
 
+  const rawValue = toRaw(displayValue);
+
   const handleDecrement = () => {
-    const numValue = typeof value === "string" ? parseFloat(value) : value;
-    if (isNaN(numValue)) {
-      setValue(min);
-    } else if (numValue > min) {
-      setValue(numValue - 1);
+    const num = rawValue === "" ? NaN : parseInt(rawValue, 10);
+    if (isNaN(num)) {
+      setDisplayValue(formatDisplay(min));
+    } else if (num > min) {
+      setDisplayValue(formatDisplay(num - 1));
     }
   };
 
   const handleIncrement = () => {
-    const numValue = typeof value === "string" ? parseFloat(value) : value;
-    if (isNaN(numValue)) {
-      setValue(min + 1);
+    const num = rawValue === "" ? NaN : parseInt(rawValue, 10);
+    if (isNaN(num)) {
+      setDisplayValue(formatDisplay(min + 1));
     } else {
-      setValue(numValue + 1);
+      setDisplayValue(formatDisplay(num + 1));
     }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
-    // Permitir solo números y un punto decimal
-    if (val === "" || /^\d*\.?\d*$/.test(val)) {
-      setValue(val);
+    const digits = val.replace(/\./g, "");
+    if (digits === "" || /^\d+$/.test(digits)) {
+      setDisplayValue(digits === "" ? "" : formatDisplay(parseInt(digits, 10)));
     }
   };
 
@@ -67,16 +81,17 @@ export function CustomNumberInput({
           {prefix}
         </span>
       )}
-      
+
+      <input type="hidden" name={name} value={rawValue} />
+
       <input
         id={id}
-        name={name}
         type="text"
-        inputMode="decimal"
+        inputMode="numeric"
         required={required}
         disabled={disabled}
         placeholder={placeholder}
-        value={value}
+        value={displayValue}
         onChange={handleInputChange}
         className={`glass-input w-full py-3 ${prefix ? "pl-8" : "pl-4"} pr-24 transition-all duration-300 focus:ring-2 focus:ring-primary/20`}
         suppressHydrationWarning
