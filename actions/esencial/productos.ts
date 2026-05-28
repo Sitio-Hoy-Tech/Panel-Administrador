@@ -90,6 +90,7 @@ export async function crearProducto(formData: FormData) {
       subcategory_id,
       price,
       sale_price,
+      compare_at_price: is_sale ? price : null,
       is_sale,
       active: true,
       position
@@ -391,6 +392,7 @@ export async function actualizarProducto(productId: string, formData: FormData) 
       subcategory_id,
       price,
       sale_price,
+      compare_at_price: is_sale ? price : null,
       is_sale
     })
     .eq('id', productId)

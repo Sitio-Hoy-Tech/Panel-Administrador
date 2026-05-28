@@ -85,6 +85,7 @@ export async function crearProducto(formData: FormData) {
       subcategory_id,
       price,
       sale_price,
+      compare_at_price: is_sale ? price : null,
       active: true,
       is_sale,
       position
@@ -319,7 +320,7 @@ export async function actualizarProducto(productId: string, formData: FormData) 
   // 1. Actualizar producto
   const { error: updateError } = await supabase
     .from('products')
-    .update({ name, slug: updatedSlug, description, category_id, subcategory_id, price, sale_price, is_sale })
+    .update({ name, slug: updatedSlug, description, category_id, subcategory_id, price, sale_price, compare_at_price: is_sale ? price : null, is_sale })
     .eq('id', productId)
     .eq('tenant_id', tenantId);
 
