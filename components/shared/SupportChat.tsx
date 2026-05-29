@@ -10,6 +10,7 @@ const crmSupabase = createClient(
 );
 
 const CRM_URL = process.env.NEXT_PUBLIC_CRM_URL!;
+const CHAT_IMAGE_PREFIX = `${process.env.NEXT_PUBLIC_CRM_SUPABASE_URL}/storage/v1/object/public/chat-images/`;
 
 // Paleta SitioHoy
 const C = {
@@ -31,7 +32,7 @@ const C = {
 
 type Message = {
   id: string;
-  sender_type: "agent" | "client";
+  sender_type: "agent" | "client" | "system";
   sender_name: string | null;
   content: string;
   created_at: string;
@@ -40,8 +41,13 @@ type Message = {
 
 type SessionStatus = "open" | "closed" | "pending";
 type Screen = "home" | "pending" | "chat" | "resolved";
+type PendingImage = { file: File; preview: string };
 
 type Props = { accessToken: string };
+
+function isChatImage(content: string) {
+  return content.startsWith(CHAT_IMAGE_PREFIX);
+}
 
 export default function SupportChat({ accessToken }: Props) {
   const [open, setOpen] = useState(false);
@@ -55,10 +61,13 @@ export default function SupportChat({ accessToken }: Props) {
   const [unread, setUnread] = useState(0);
   const [requesting, setRequesting] = useState(false);
   const [requestError, setRequestError] = useState(false);
+  const [pendingImages, setPendingImages] = useState<PendingImage[]>([]);
+  const [uploadError, setUploadError] = useState(false);
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const openRef = useRef(open);
   useEffect(() => { openRef.current = open; }, [open]);
 
@@ -139,6 +148,22 @@ export default function SupportChat({ accessToken }: Props) {
       .channel(`client-chat-${sessionId}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "chat_messages", filter: `session_id=eq.${sessionId}` }, (payload) => {
         const msg = payload.new as Message;
+        if (msg.sender_type === "system") {
+          if (msg.content === "__session_closed__") {
+            setMessages([]);
+            setScreen("resolved");
+            setOpen(true);
+            playResolvedSound();
+          } else if (msg.content === "__session_reopened__") {
+            setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, msg]);
+            setScreen("chat");
+            if (!openRef.current) {
+              setUnread(u => u + 1);
+              playNotificationSound();
+            }
+          }
+          return;
+        }
         if (msg.sender_type === "agent") {
           setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, msg]);
           if (!openRef.current) {
@@ -147,10 +172,11 @@ export default function SupportChat({ accessToken }: Props) {
           }
         }
       })
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "chat_sessions", filter: `id=eq.${sessionId}` }, (payload) => {
-        const updated = payload.new as { status: SessionStatus };
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "chat_sessions" }, (payload) => {
+        const updated = payload.new as { id: string; status: SessionStatus };
+        if (updated.id !== sessionId) return;
         if (updated.status === "open") { setScreen("chat"); playNotificationSound(); }
-        if (updated.status === "closed") { setMessages([]); setScreen("resolved"); playResolvedSound(); }
+        if (updated.status === "closed") { setMessages([]); setScreen("resolved"); setOpen(true); playResolvedSound(); }
       })
       .subscribe();
     return () => { crmSupabase.removeChannel(channel); };
@@ -195,7 +221,11 @@ export default function SupportChat({ accessToken }: Props) {
   }
 
   function handleNewConsulta() {
-    setSessionId(null); setMessages([]); setHasMore(false); setInput(""); setRequestError(false); setScreen("home");
+    setSessionId(null); setMessages([]); setHasMore(false); setInput(""); setRequestError(false);
+    setUploadError(false);
+    pendingImages.forEach(img => URL.revokeObjectURL(img.preview));
+    setPendingImages([]);
+    setScreen("home");
   }
 
   async function loadMore() {
@@ -210,27 +240,62 @@ export default function SupportChat({ accessToken }: Props) {
     requestAnimationFrame(() => { if (container) container.scrollTop = container.scrollHeight - prevH; });
   }
 
+  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    e.target.value = "";
+    if (!files.length) return;
+    const valid = files.filter(f => f.type.startsWith("image/") && f.size <= 5 * 1024 * 1024);
+    if (valid.length < files.length) setUploadError(true);
+    else setUploadError(false);
+    if (!valid.length) return;
+    const newImages = valid.map(f => ({ file: f, preview: URL.createObjectURL(f) }));
+    setPendingImages(prev => [...prev, ...newImages].slice(0, 5));
+  }
+
+  async function postMessage(content: string) {
+    const tempId = `temp-${Date.now()}-${Math.random()}`;
+    setMessages(prev => [...prev, { id: tempId, sender_type: "client", sender_name: clienteNombre || "Yo", content, created_at: new Date().toISOString(), _optimistic: true }]);
+    const res = await fetch(`${CRM_URL}/api/client/chat/${sessionId}/messages`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
+      body: JSON.stringify({ content }),
+    });
+    if (res.ok) {
+      const json = await res.json();
+      setMessages(prev => prev.map(m => m.id === tempId ? json.message : m));
+    } else {
+      setMessages(prev => prev.filter(m => m.id !== tempId));
+      if (res.status === 403) {
+        setMessages([]); setScreen("resolved"); setOpen(true); playResolvedSound();
+        return;
+      }
+      throw new Error("send_failed");
+    }
+  }
+
   async function sendMessage() {
-    if (!sessionId || !input.trim() || sending) return;
-    const content = input.trim();
+    if (!sessionId || (!input.trim() && !pendingImages.length) || sending) return;
+    const text = input.trim();
+    const imagesToSend = pendingImages;
     setInput("");
     setSending(true);
-    const tempId = `temp-${Date.now()}`;
-    setMessages(prev => [...prev, { id: tempId, sender_type: "client", sender_name: clienteNombre || "Yo", content, created_at: new Date().toISOString(), _optimistic: true }]);
+    setUploadError(false);
+    setPendingImages([]);
+    imagesToSend.forEach(img => URL.revokeObjectURL(img.preview));
     try {
-      const res = await fetch(`${CRM_URL}/api/client/chat/${sessionId}/messages`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
-        body: JSON.stringify({ content }),
-      });
-      if (res.ok) {
-        const json = await res.json();
-        setMessages(prev => prev.map(m => m.id === tempId ? json.message : m));
-      } else {
-        setMessages(prev => prev.filter(m => m.id !== tempId));
+      for (const img of imagesToSend) {
+        const ext = img.file.name.split(".").pop()?.toLowerCase() || "jpg";
+        const path = `${sessionId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+        const { data, error } = await crmSupabase.storage
+          .from("chat-images")
+          .upload(path, img.file, { contentType: img.file.type });
+        if (error) throw error;
+        const { data: { publicUrl } } = crmSupabase.storage.from("chat-images").getPublicUrl(data.path);
+        await postMessage(publicUrl);
       }
+      if (text) await postMessage(text);
     } catch {
-      setMessages(prev => prev.filter(m => m.id !== tempId));
+      setUploadError(true);
     } finally {
       setSending(false);
     }
@@ -396,11 +461,29 @@ export default function SupportChat({ accessToken }: Props) {
                 )}
 
                 {messages.map((msg, i) => {
+                  // System messages render as separators
+                  if (msg.sender_type === "system") {
+                    const labelMap: Record<string, string> = {
+                      __session_reopened__: "Conversación reabierta",
+                      __session_closed__:   "Conversación cerrada",
+                    };
+                    const label = labelMap[msg.content];
+                    if (!label) return null;
+                    return (
+                      <div key={msg.id} className="flex items-center gap-2 my-3 px-1">
+                        <div className="flex-1 h-px" style={{ background: C.borderAlt }} />
+                        <span className="text-[10px] flex-shrink-0" style={{ color: C.textMuted }}>{label}</span>
+                        <div className="flex-1 h-px" style={{ background: C.borderAlt }} />
+                      </div>
+                    );
+                  }
+
                   const isClient = msg.sender_type === "client";
                   const prevMsg = i > 0 ? messages[i - 1] : null;
                   const showMeta = !prevMsg || prevMsg.sender_type !== msg.sender_type;
                   const nextMsg = i < messages.length - 1 ? messages[i + 1] : null;
                   const isLast = !nextMsg || nextMsg.sender_type !== msg.sender_type;
+                  const isImage = isChatImage(msg.content);
 
                   return (
                     <div key={msg.id} className={`flex ${isClient ? "justify-end" : "justify-start"} ${showMeta ? "mt-4" : "mt-0.5"}`}>
@@ -416,15 +499,33 @@ export default function SupportChat({ accessToken }: Props) {
                             {isClient ? "Vos" : (msg.sender_name ?? "Soporte")}
                           </span>
                         )}
-                        <div
-                          className="px-3.5 py-2 text-sm leading-relaxed whitespace-pre-wrap break-words rounded-2xl"
-                          style={isClient
-                            ? { background: C.accent, color: "white", borderTopRightRadius: "4px", opacity: msg._optimistic ? 0.55 : 1 }
-                            : { background: C.card, color: C.text, borderTopLeftRadius: "4px", border: `1px solid ${C.borderAlt}` }
-                          }
-                        >
-                          {msg.content}
-                        </div>
+                        {isImage ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={msg.content}
+                            alt="Imagen adjunta"
+                            className="block"
+                            style={{
+                              width: "160px",
+                              height: "160px",
+                              objectFit: "cover",
+                              borderRadius: "16px",
+                              borderTopRightRadius: isClient ? "4px" : "16px",
+                              borderTopLeftRadius: !isClient ? "4px" : "16px",
+                              opacity: msg._optimistic ? 0.55 : 1,
+                            }}
+                          />
+                        ) : (
+                          <div
+                            className="px-3.5 py-2 text-sm leading-relaxed whitespace-pre-wrap break-words rounded-2xl"
+                            style={isClient
+                              ? { background: C.accent, color: "white", borderTopRightRadius: "4px", opacity: msg._optimistic ? 0.55 : 1 }
+                              : { background: C.card, color: C.text, borderTopLeftRadius: "4px", border: `1px solid ${C.borderAlt}` }
+                            }
+                          >
+                            {msg.content}
+                          </div>
+                        )}
                         {isLast && (
                           <span className="text-[10px] mt-1 px-1" style={{ color: C.textMuted }}>{formatTime(msg.created_at)}</span>
                         )}
@@ -436,11 +537,67 @@ export default function SupportChat({ accessToken }: Props) {
               </div>
 
               <div className="flex-shrink-0 px-3 pt-2.5 pb-3" style={{ background: C.card, borderTop: `1px solid ${C.borderAlt}` }}>
-                <div className="flex items-end gap-2 rounded-2xl px-3.5 pt-2.5 pb-2.5" style={{ background: C.inputBg, border: `1px solid ${C.border}` }}>
+                {/* Image previews */}
+                {pendingImages.length > 0 && (
+                  <div className="mb-2 flex gap-2 overflow-x-auto px-0.5 pb-0.5">
+                    {pendingImages.map((img, i) => (
+                      <div key={i} className="relative flex-shrink-0">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={img.preview}
+                          alt="Vista previa"
+                          className="h-16 w-16 rounded-xl object-cover"
+                          style={{ border: `1px solid ${C.accentBorder}` }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            URL.revokeObjectURL(img.preview);
+                            setPendingImages(prev => prev.filter((_, j) => j !== i));
+                          }}
+                          className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center"
+                          style={{ background: "#ef4444", boxShadow: "0 1px 4px rgba(0,0,0,0.4)" }}
+                          aria-label="Quitar imagen"
+                        >
+                          <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Input row */}
+                <div className="flex items-center gap-2 rounded-2xl px-3.5 py-2.5" style={{ background: C.inputBg, border: `1px solid ${C.border}` }}>
+                  {/* Hidden file input */}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/gif,image/webp"
+                    multiple
+                    className="hidden"
+                    onChange={handleFileSelect}
+                  />
+
+                  {/* Attachment button */}
+                  <button
+                    type="button"
+                    onClick={() => { setUploadError(false); fileInputRef.current?.click(); }}
+                    disabled={sending}
+                    className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors disabled:opacity-30"
+                    style={{ color: pendingImages.length > 0 ? C.accent : C.textMuted }}
+                    aria-label="Adjuntar imagen"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                    </svg>
+                  </button>
+
                   <textarea
                     ref={inputRef}
                     value={input}
-                    onChange={e => setInput(e.target.value)}
+                    onChange={e => { setInput(e.target.value); setUploadError(false); }}
                     onKeyDown={handleKeyDown}
                     placeholder="Escribí tu mensaje..."
                     rows={1}
@@ -451,21 +608,28 @@ export default function SupportChat({ accessToken }: Props) {
                   <button
                     type="button"
                     onClick={sendMessage}
-                    disabled={!input.trim() || sending}
-                    className="w-8 h-8 rounded-[14px] flex items-center justify-center transition-all flex-shrink-0 mb-0.5 disabled:opacity-30 disabled:cursor-not-allowed"
+                    disabled={(!input.trim() && pendingImages.length === 0) || sending}
+                    className="w-8 h-8 rounded-[14px] flex items-center justify-center transition-all flex-shrink-0 disabled:opacity-30 disabled:cursor-not-allowed"
                     style={{ background: C.accent }}
                     aria-label="Enviar"
                   >
                     {sending ? (
                       <div className="w-3.5 h-3.5 border-2 rounded-full animate-spin" style={{ borderColor: "rgba(255,255,255,0.3)", borderTopColor: "white" }} />
                     ) : (
-                      <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3.5 h-3.5 text-white rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                       </svg>
                     )}
                   </button>
                 </div>
-                <p className="text-center text-[10px] mt-2" style={{ color: C.textMuted }}>Soporte SitioHoy</p>
+
+                {uploadError ? (
+                  <p className="text-center text-[10px] mt-2" style={{ color: "#ef4444" }}>
+                    Error al enviar la imagen. Máx. 5 MB.
+                  </p>
+                ) : (
+                  <p className="text-center text-[10px] mt-2" style={{ color: C.textMuted }}>Soporte SitioHoy</p>
+                )}
               </div>
             </>
           )}
