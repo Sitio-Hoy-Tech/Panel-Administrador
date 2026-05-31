@@ -45,8 +45,23 @@ type PendingImage = { file: File; preview: string };
 
 type Props = { accessToken: string };
 
+type Attachment = { __type: "attachment"; url: string; name: string; size: number; mime: string };
+
+function parseAttachment(content: string): Attachment | null {
+  try {
+    const parsed = JSON.parse(content);
+    if (parsed?.__type === "attachment" && typeof parsed.url === "string") return parsed as Attachment;
+  } catch { /* not JSON */ }
+  return null;
+}
+
 function isChatImage(content: string) {
-  return content.startsWith(CHAT_IMAGE_PREFIX);
+  if (parseAttachment(content) !== null) return true;
+  const trimmed = content.trim();
+  if (trimmed.startsWith(CHAT_IMAGE_PREFIX)) return true;
+  if (!trimmed.startsWith("http://") && !trimmed.startsWith("https://")) return false;
+  if (trimmed.includes("/storage/v1/object/public/chat-images/")) return true;
+  return /\.(jpg|jpeg|png|gif|webp)(\?[^"\s]*)?$/i.test(trimmed);
 }
 
 export default function SupportChat({ accessToken }: Props) {
@@ -63,6 +78,7 @@ export default function SupportChat({ accessToken }: Props) {
   const [requestError, setRequestError] = useState(false);
   const [pendingImages, setPendingImages] = useState<PendingImage[]>([]);
   const [uploadError, setUploadError] = useState(false);
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
@@ -502,9 +518,10 @@ export default function SupportChat({ accessToken }: Props) {
                         {isImage ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
-                            src={msg.content}
-                            alt="Imagen adjunta"
-                            className="block"
+                            src={parseAttachment(msg.content)?.url ?? msg.content}
+                            alt={parseAttachment(msg.content)?.name ?? "Imagen adjunta"}
+                            className="block cursor-pointer"
+                            onClick={() => setLightboxSrc(parseAttachment(msg.content)?.url ?? msg.content)}
                             style={{
                               width: "160px",
                               height: "160px",
@@ -686,6 +703,35 @@ export default function SupportChat({ accessToken }: Props) {
           </span>
         )}
       </button>
+
+      {/* Lightbox */}
+      {lightboxSrc && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center"
+          style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(6px)" }}
+          onClick={() => setLightboxSrc(null)}
+        >
+          <button
+            type="button"
+            onClick={() => setLightboxSrc(null)}
+            className="absolute top-4 right-4 w-9 h-9 rounded-full flex items-center justify-center transition-colors"
+            style={{ background: "rgba(255,255,255,0.12)", color: "white" }}
+            aria-label="Cerrar"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={lightboxSrc}
+            alt="Imagen ampliada"
+            className="max-w-[90vw] max-h-[85vh] rounded-2xl object-contain"
+            style={{ boxShadow: "0 24px 64px rgba(0,0,0,0.7)" }}
+            onClick={e => e.stopPropagation()}
+          />
+        </div>
+      )}
     </>
   );
 }
