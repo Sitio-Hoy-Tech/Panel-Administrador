@@ -148,12 +148,19 @@ export default function DashboardLayout({
 
   const chat = accessToken ? <SupportChat accessToken={accessToken} /> : null;
 
+  const planMeta: Record<PlanType, { planName: string; planPrice: string }> = {
+    esencial:       { planName: "Plan Esencial",       planPrice: "$25.000/mes" },
+    emprendimiento: { planName: "Plan Emprendimiento", planPrice: "$37.000/mes" },
+    empresa:        { planName: "Plan Empresa",        planPrice: "$65.000/mes" },
+  };
+  const ctxValue = { expired: subscriptionExpired, atRisk: subscriptionAtRisk, graceDaysLeft, paymentUrl, ...planMeta[plan] };
+
   switch (plan) {
     case "esencial":
-      return <SubscriptionContext.Provider value={{ expired: subscriptionExpired, atRisk: subscriptionAtRisk, graceDaysLeft, paymentUrl }}><EsencialLayout>{children}</EsencialLayout>{chat}</SubscriptionContext.Provider>;
+      return <SubscriptionContext.Provider value={ctxValue}><EsencialLayout>{children}</EsencialLayout>{chat}</SubscriptionContext.Provider>;
     case "emprendimiento":
-      return <SubscriptionContext.Provider value={{ expired: subscriptionExpired, atRisk: subscriptionAtRisk, graceDaysLeft, paymentUrl }}><EmprendimientoLayout>{children}</EmprendimientoLayout>{chat}</SubscriptionContext.Provider>;
+      return <SubscriptionContext.Provider value={ctxValue}><EmprendimientoLayout>{children}</EmprendimientoLayout>{chat}</SubscriptionContext.Provider>;
     case "empresa":
-      return <SubscriptionContext.Provider value={{ expired: subscriptionExpired, atRisk: subscriptionAtRisk, graceDaysLeft, paymentUrl }}><EmpresaLayout>{children}</EmpresaLayout>{chat}</SubscriptionContext.Provider>;
+      return <SubscriptionContext.Provider value={ctxValue}><EmpresaLayout>{children}</EmpresaLayout>{chat}</SubscriptionContext.Provider>;
   }
 }
